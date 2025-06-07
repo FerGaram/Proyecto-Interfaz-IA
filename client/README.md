@@ -1,3 +1,17 @@
+# Instalación del proyecto
+
+1. Instala las dependencias.
+```bash
+npm install
+```
+
+2. Ejecuta el proyecto.
+```bash
+npm run dev
+```
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
