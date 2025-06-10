@@ -1,8 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Tuple, List, Optional
-import math
-from Busquedas import (
+from typing import Dict, Tuple, List
+from app.Busquedas import (
     busquedaAmplitud,
     busquedaProfundidad,
     busquedaProfundidadIterativa,
@@ -19,16 +18,16 @@ class GrafoInput(BaseModel):
     aristas: Dict[str, float]
     inicio: str
     meta: str
-    algoritmo: str  # BFS, DFS, IDDFS, Costo Uniforme, Ávara, A*
+    algoritmo: str  # Valores permitidos: BFS, DFS, IDDFS, Costo Uniforme, Ávara, A*
 
 def construir_grafo(aristas: Dict[str, float]) -> Dict[str, List[Tuple[str, float]]]:
     grafo = {}
     for clave, peso in aristas.items():
         if '-' not in clave:
             continue
-        a, b = clave.split('-')
+        a, b = clave.split('-', 1)  # Limitar split a 1, por si acaso
         grafo.setdefault(a, []).append((b, peso))
-        grafo.setdefault(b, []).append((a, peso))  # Asumimos no dirigido
+        grafo.setdefault(b, []).append((a, peso))  # Grafo no dirigido
     return grafo
 
 @app.post("/buscar")
@@ -37,7 +36,12 @@ def buscar_camino(data: GrafoInput):
     coords = data.nodos
     inicio = data.inicio
     meta = data.meta
-    algoritmo = data.algoritmo
+    algoritmo = data.algoritmo.strip()  # Por si hay espacios extra
+
+    if inicio not in grafo:
+        raise HTTPException(status_code=400, detail=f"Nodo inicio '{inicio}' no existe en el grafo.")
+    if meta not in grafo:
+        raise HTTPException(status_code=400, detail=f"Nodo meta '{meta}' no existe en el grafo.")
 
     if not validar_para(algoritmo, grafo, coords, meta):
         raise HTTPException(status_code=400, detail="Datos inválidos para el algoritmo seleccionado.")
@@ -63,7 +67,4 @@ def buscar_camino(data: GrafoInput):
     return {
         "camino": camino,
         "costo": costo,
-        #"padres": padres
     }
-    
-    

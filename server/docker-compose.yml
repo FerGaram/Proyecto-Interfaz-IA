@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  grafo_api:
+    build: .
+    container_name: grafo_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    restart: always

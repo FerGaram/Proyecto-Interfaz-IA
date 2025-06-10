@@ -1,0 +1,66 @@
+# 🚀 Grafo API
+
+Este proyecto es una API desarrollada con FastAPI para procesar grafos y ejecutar algoritmos de búsqueda informada como A* o búsqueda ávara. Utiliza archivos `.txt` como entrada y genera visualizaciones o rutas óptimas como salida.
+
+## 📁 Estructura del Proyecto
+
+grafo_api/
+│
+├── app/
+│ ├── API.py # Endpoints principales de FastAPI
+│ ├── Busquedas.py # Implementación de algoritmos de  búsqueda
+│
+├── utils/
+│ ├── GenerarJson.py # Funciones auxiliares para el procesamiento de datos
+│
+├── tests/
+│ └── ejemplo_entrada.txt # Archivo de entrada de prueba
+│
+├── requirements.txt # Dependencias del proyecto
+├── Dockerfile # Imagen de Docker
+├── docker-compose.yml # Orquestación con Docker Compose
+└── main.py # Punto de entrada de FastAPI
+
+
+## 🐳 Cómo Ejecutar con Docker
+
+### 🔧 Construir el contenedor
+
+# Crear y correr por primera vez
+"docker-compose up --build"
+
+Luego verifica que el contenedor se haya creado correctamente y que la API esté corriendo con "docker ps".
+
+# Detener temporalmente
+"docker-compose stop"
+
+# Reanudar o iniciar el contenedor una vez creado
+"docker-compose start"
+
+
+### 🌐 Acceder a la API
+
+Abre tu navegador y ve a `http://localhost:8000` para ver la documentación interactiva de la API generada por FastAPI.
+
+
+###  Documentación interactiva
+
+* Swagger UI: "http://127.0.0.1:8000/docs"
+* ReDoc: "http://127.0.0.1:8000/redoc"
+
+### 📝 Notas
+
+- La API está diseñada para ser extensible, por lo que puedes agregar más algoritmos o funcionalidades según sea necesario.
+- Los archivos de entrada deben seguir el formato especificado en `tests/ejemplo_entrada.txt`.
+- La documentación de la API está disponible en `/docs` y `/redoc`.
+
+
+### 🚀 Forma de usarlo
+En el archivo `tests/ejemplo_entrada.txt` se encuentra un ejemplo de cómo debe ser el formato de entrada. 
+Puedes modificarlo o crear nuevos archivos siguiendo el mismo formato.
+
+luego en la terminal ejecuta el siguiente comando:
+C:\grafo_api> "python utils/generarJSON.py"
+
+Para cabiar el tipo de búsqueda, modifica la variable `tipo_busqueda` en el archivo `utils/generarJSON.py` a "A*" o "Avara".
+en la línea 93     data = generar_json_para_api("tests/ejemplo_entrada.txt", "A", "C", "A*")
