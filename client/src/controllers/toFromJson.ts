@@ -1,0 +1,1 @@
+// Función para convertir nodos y aristas a JSON
