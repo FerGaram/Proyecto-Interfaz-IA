@@ -41,12 +41,18 @@ def busquedaAmplitud(grafo, inicio, meta, debug=False):
 def busquedaProfundidad(grafo, nodo_inicio, nodo_meta, debug=False):
     pila = [nodo_inicio]
     padres = {nodo_inicio: None}
+    visitados = set()  
 
     while pila:
         if debug:
             print("Nodos en pila:", pila)
 
-        nodo = pila.pop()  # Cambio: pop() para LIFO
+        nodo = pila.pop()
+
+        if nodo in visitados:
+            continue  
+
+        visitados.add(nodo)
 
         if debug:
             print("Nodo extraído:", nodo)
@@ -59,13 +65,12 @@ def busquedaProfundidad(grafo, nodo_inicio, nodo_meta, debug=False):
             return camino, len(camino) - 1
 
         for hijo, _ in reversed(grafo.get(nodo, [])):
-            if padres[nodo] is not None and hijo == padres[nodo]:
-                continue
-            if hijo not in padres:
+            if hijo not in visitados and hijo not in padres:
                 padres[hijo] = nodo
-                pila.append(hijo)  # Cambio: append en vez de insert(0)
+                pila.append(hijo)
 
     return None, None
+
 
 
 
