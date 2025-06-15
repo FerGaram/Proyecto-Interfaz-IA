@@ -1,10 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Tuple, List
+from typing import Dict, Optional, Tuple, List
 from app.Busquedas import (
     busquedaAmplitud,
     busquedaProfundidad,
     busquedaProfundidadIterativa,
+    busquedaProfundidadLimitada,
     busquedaCostoUniforme,
     busquedaAvara,
     busquedaAEstrella,
@@ -18,7 +19,8 @@ class GrafoInput(BaseModel):
     aristas: Dict[str, float]
     inicio: str
     meta: str
-    algoritmo: str  # Valores permitidos: BFS, DFS, IDDFS, Costo Uniforme, Ávara, A*
+    algoritmo: str  # Valores permitidos: BFS, DFS, IDDFS, Costo Uniforme, Ávara, A*, DLS
+    limite: Optional[int] = None
 
 def construir_grafo(aristas: Dict[str, float]) -> Dict[str, List[Tuple[str, float]]]:
     grafo = {}
@@ -50,6 +52,10 @@ def buscar_camino(data: GrafoInput):
         camino, costo = busquedaAmplitud(grafo, inicio, meta)
     elif algoritmo == "DFS":
         camino, costo = busquedaProfundidad(grafo, inicio, meta)
+    elif algoritmo == "DLS":
+        if data.limite is None or data.limite < 0:
+            raise HTTPException(status_code=400, detail="Debe especificarse un límite para la búsqueda en profundidad limitada.")
+        camino, costo = busquedaProfundidadLimitada(grafo, inicio, meta, data.limite)
     elif algoritmo == "IDDFS":
         camino, costo = busquedaProfundidadIterativa(grafo, inicio, meta)
     elif algoritmo == "Costo Uniforme":
