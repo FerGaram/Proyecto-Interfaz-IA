@@ -53,7 +53,7 @@ def buscar_camino(data: GrafoInput):
     elif algoritmo == "DFS":
         camino, costo = busquedaProfundidad(grafo, inicio, meta)
     elif algoritmo == "DLS":
-        if data.limite is None:
+        if data.limite is None or data.limite < 0:
             raise HTTPException(status_code=400, detail="Debe especificarse un límite para la búsqueda en profundidad limitada.")
         camino, costo = busquedaProfundidadLimitada(grafo, inicio, meta, data.limite)
     elif algoritmo == "IDDFS":
