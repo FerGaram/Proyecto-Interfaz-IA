@@ -18,9 +18,10 @@ import type { defaultNodeModel } from "./models/defaultNodeModel";
 import type { defaultEdgeModel } from "./models/defaultEdgeModel";
 import { NodeTest } from "./components/nodes/NodeTest";
 import { NodeCircle } from "./components/nodes/NodeCircle";
+import { NodeEllipse } from "./components/nodes/NodeEllipse";
 
 // Aquí se deben importar los nodos personalizados que se hayan hecho
-const nodeTypes = { nodeTest: NodeTest, nodeCricle: NodeCircle };
+const nodeTypes = { nodeTest: NodeTest, nodeCricle: NodeCircle, nodeEllipse: NodeEllipse };
 
 // Lista de nodos iniciales de prueba, se podrían borrar más adelante
 const nodosIniciales: Array<defaultNodeModel> = [
@@ -40,7 +41,7 @@ const nodosIniciales: Array<defaultNodeModel> = [
     id: "3",
     position: { x: 200, y: 100 },
     data: { label: "3" },
-    type: "nodeCricle",
+    type: "nodeEllipse",
   },
 
 ];
