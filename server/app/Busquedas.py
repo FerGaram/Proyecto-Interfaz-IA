@@ -71,8 +71,28 @@ def busquedaProfundidad(grafo, nodo_inicio, nodo_meta, debug=False):
 
     return None, None
 
+#Función que usa Profundidad Limitada, verificar si lo ocuparán los del front
+def busquedaProfundidadLimitada(grafo, inicio, meta, limite, debug=False):
+    def dfs(nodo, profundidad, visitados, camino):
+        if profundidad < 0:
+            return None
+        visitados.add(nodo)
+        camino.append(nodo)
+        if nodo == meta:
+            return list(camino)
+        for vecino, _ in grafo.get(nodo, []):
+            if vecino not in visitados:
+                resultado = dfs(vecino, profundidad - 1, visitados, camino)
+                if resultado:
+                    return resultado
+        camino.pop()
+        visitados.remove(nodo)
+        return None
 
-
+    resultado = dfs(inicio, limite, set(), [])
+    if resultado:
+        return resultado, len(resultado) - 1
+    return None, None
 
 def busquedaProfundidadIterativa(grafo, inicio, meta, maxima_profundidad=10, debug=False):
     def dfs_limitado(nodo_actual, profundidad_max, visitados, camino):
