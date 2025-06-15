@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 interface KeyboardShortcutsProps {
   onUndo: () => void;
+  onRedo: () => void; // <-- Añadido de nuevo
   onCopy: () => void;
   onPaste: () => void;
   onCut: () => void;
@@ -10,6 +11,7 @@ interface KeyboardShortcutsProps {
 
 export const KeyboardShortcuts = ({
   onUndo,
+  onRedo, // <-- Añadido de nuevo
   onCopy,
   onPaste,
   onCut,
@@ -22,6 +24,10 @@ export const KeyboardShortcuts = ({
           case "z":
             e.preventDefault();
             onUndo();
+            break;
+          case "y": // <-- Añadido de nuevo
+            e.preventDefault();
+            onRedo(); // <-- Añadido de nuevo
             break;
           case "c":
             e.preventDefault();
@@ -46,6 +52,6 @@ export const KeyboardShortcuts = ({
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onUndo, onCopy, onPaste, onCut, onDuplicate]);
+  }, [onUndo, onRedo, onCopy, onPaste, onCut, onDuplicate]); // <-- onRedo añadido a las dependencias
   return null;
 };
