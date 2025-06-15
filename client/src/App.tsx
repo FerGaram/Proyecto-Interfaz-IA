@@ -54,6 +54,7 @@ function Flow() {
   // Hooks para obtener y asignar nuevos nodos y aristas
   const [nodes, setNodes] = useState(nodosIniciales);
   const [edges, setEdges] = useState(aristasIniciales);
+  const [minimized, setMinimized] = useState(false); //se agrega para ocuptar postit
 
   // Hooks para conservar el último ID de nodo añadido
   const ultimoId = useRef(2); // Está así para contar las dos iniciales, si esas se borran, recuerden cambiar este valor
@@ -138,15 +139,17 @@ function Flow() {
         <Controls /* Botones de la esquina inferior izquierda */ />
         <MiniMap /* Minimapa de la esquina inferior derecha */ />
         <Panel position="top-left">
-          <>
-            <p>
-              Nodo inicial:{" "}
-              {nodoInicial === "" ? "Sin seleccionar" : nodoInicial}
-            </p>
-            <p>
-              Nodo final: {nodoFinal === "" ? "Sin seleccionar" : nodoFinal}
-            </p>
-          </>
+          <div className="panel-box">
+            <>
+              <p>
+                Nodo inicial:{" "}
+                {nodoInicial === "" ? "Sin seleccionar" : nodoInicial}
+              </p>
+              <p>
+                Nodo final: {nodoFinal === "" ? "Sin seleccionar" : nodoFinal}
+              </p>
+            </>
+          </div>
         </Panel>
         <Panel
           position="top-center" /* Panel para mostrar botones de prueba en parte superior */
@@ -159,19 +162,21 @@ function Flow() {
               <button onClick={limpiarPantalla} className="custom-btn">
                 Limpiar pantalla
               </button>
-              <button onClick={pruebaOnClick} className="test-btn">
+              <button onClick={pruebaOnClick} className="custom-btn">
                 Imprimir nodos y aristas en consola
               </button>
-            </div>
-            <div className="main-content">
-              {/* El resto de tu interfaz principal aquí */}
             </div>
           </>
         </Panel>
         <Panel
           position="top-right" /* Panel para mostrar controles en la esquina superior derecha */
         >
-          <>
+          <div
+            className={`postit${minimized ? " minimized" : ""}`}
+            onClick={() => setMinimized(!minimized)}
+            style={{ cursor: "pointer" }}
+            title="Haz clic para expandir o reducir"
+          >
             <center>
               <h4>Controles</h4>
             </center>
@@ -189,7 +194,7 @@ function Flow() {
                 conector, y suelta en otro del nodo a conectar
               </li>
             </ul>
-          </>
+          </div>
         </Panel>
         <Panel
           position="bottom-center" /* Panel para mostrar opciones de algoritmos */
