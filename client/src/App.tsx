@@ -266,6 +266,7 @@ function Flow() {
           onConnect={onConnect} // Handler de conexiones
           fitView // Ajusta la pantalla para contener y centrar los nodos iniciales
           connectionMode={ConnectionMode.Loose} // Se define de esta forma para que los conectores puedan iniciar y terminar conexiones
+          colorMode={darkMode ? "dark" : "light"}
         >
           <Background /* Fondo punteado */ />
           <Controls /* Botones de la esquina inferior izquierda */ />
