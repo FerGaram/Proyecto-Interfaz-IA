@@ -202,23 +202,6 @@ function Flow() {
           </>
         </Panel>
         <Panel
-          position="top-center" /* Panel para mostrar botones de prueba en parte superior */
-        >
-          <>
-            <div className="top-panel">
-              <button onClick={addNode} className="custom-btn">
-                Añadir nuevo nodo
-              </button>
-              <button onClick={limpiarPantalla} className="custom-btn">
-                Limpiar pantalla
-              </button>
-              <button onClick={pruebaOnClick} className="custom-btn">
-                Imprimir nodos y aristas en consola
-              </button>
-            </div>
-          </>
-        </Panel>
-        <Panel
           position="top-right" /* Panel para mostrar controles en la esquina superior derecha */
         >
           <div
