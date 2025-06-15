@@ -42,7 +42,7 @@ const nodosIniciales: Array<defaultNodeModel> = [
     id: "3",
     position: { x: 200, y: 100 },
     data: { label: "3" },
-    type: "nodeCircle",
+    type: "nodeRombo",
   },
 
 ];
@@ -59,6 +59,15 @@ const aristasIniciales: Array<defaultEdgeModel> = [
   },
 ];
 
+const nodeTypesArray = [
+  { label: "Cuadro", value: "nodeTest" },
+  { label: "Círculo", value: "nodeCircle" },
+  { label: "Elipse", value: "nodeEllipse" },
+  { label: "Rombo", value: "nodeRombo" },
+  // Agrega aquí tus tipos personalizados
+];
+
+
 // Función principal
 function Flow() {
   // Hooks para obtener y asignar nuevos nodos y aristas
@@ -66,7 +75,7 @@ function Flow() {
   const [edges, setEdges] = useState(aristasIniciales);
 
   // Hooks para conservar el último ID de nodo añadido
-  const ultimoId = useRef(2); // Está así para contar las dos iniciales, si esas se borran, recuerden cambiar este valor
+  const ultimoId = useRef(3); // Está así para contar las dos iniciales, si esas se borran, recuerden cambiar este valor
   // Valores para coordenadas que se usan cuando se añade un nodo individual
   const xPos = useRef(50);
   const yPos = useRef(50);
@@ -81,23 +90,21 @@ function Flow() {
       setNodes((nds) => applyNodeChanges(changes, nds)),
     []
   );
-
+  const [selectedType, setSelectedType] = useState("nodeTest");
   // Handler para añadir un nodo específico
   const addNode = useCallback(() => {
     ultimoId.current++;
-    setNodes((nds: defaultNodeModel[]) => {
-      console.log(nds);
-      return [
-        ...nds,
-        {
-          id: ultimoId.current.toString(),
-          position: { x: xPos.current, y: yPos.current },
-          data: { label: ultimoId.current.toString() },
-          type: "nodeTest",
-        },
-      ];
-    });
-  }, []);
+    setNodes((nds: defaultNodeModel[]) => [
+      ...nds,
+      {
+        id: ultimoId.current.toString(),
+        position: { x: xPos.current, y: yPos.current },
+        data: { label: ultimoId.current.toString() },
+        type: selectedType, // ← usa el tipo seleccionado
+      },
+    ]);
+  }, [selectedType]);
+
 
   // Handler para añadir/modificar/eliminar aristas, no hace falta modificar
   const onEdgesChange = useCallback(
@@ -158,24 +165,37 @@ function Flow() {
             </p>
           </>
         </Panel>
-        <Panel
-          position="top-center" /* Panel para mostrar botones de prueba en parte superior */
-        >
+        <Panel position="top-center">
           <>
             <div className="top-panel">
-              <button onClick={addNode} className="custom-btn">
-                Añadir nuevo nodo
-              </button>
-              <button onClick={limpiarPantalla} className="custom-btn">
-                Limpiar pantalla
-              </button>
-              <button onClick={pruebaOnClick} className="test-btn">
-                Imprimir nodos y aristas en consola
-              </button>
+              <div className="add-node-controls-inline">
+                <div className="dropdown-wrapper">
+                  <select
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
+                    className="custom-dropdown small"
+                  >
+                    {nodeTypesArray.map((node) => (
+                      <option key={node.value} value={node.value}>
+                        {node.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button onClick={addNode} className="custom-btn">
+                  Añadir nuevo nodo
+                </button>
+                <button onClick={limpiarPantalla} className="custom-btn">
+                  Limpiar pantalla
+                </button>
+                <button onClick={pruebaOnClick} className="test-btn">
+                  Imprimir nodos y aristas en consola
+                </button>
+              </div>
             </div>
-            <div className="main-content">
-              {/* El resto de tu interfaz principal aquí */}
-            </div>
+
+            <div className="main-content">{/* ... */}</div>
           </>
         </Panel>
         <Panel
