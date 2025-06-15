@@ -9,11 +9,27 @@ body {
   height: 100vh;
 }
 
+:root {
+  --node-bg-light: #fff;
+  --node-bg-dark: #23272f;
+  --node-border-light: #000;
+  --node-border-dark: #fff;
+}
+
+body[data-theme='dark'] {
+  --node-bg: var(--node-bg-dark);
+  --node-border: var(--node-border-dark);
+}
+body:not([data-theme='dark']) {
+  --node-bg: var(--node-bg-light);
+  --node-border: var(--node-border-light);
+}
+
 .node-test {
-  border: 1px solid #000;
+  border: 1px solid var(--node-border);
   padding: 15px;
   border-radius: 5px;
-  background: white;
+  background: var(--node-bg);
 }
 
 .node-test label {
@@ -23,9 +39,9 @@ body {
 .node-circle {
   width: 50px;              
   height: 50px;
-  border: 1px solid #000;
+  border: 1px solid var(--node-border);
   border-radius: 50%;       
-  background: white;
+  background: var(--node-bg);
   display: flex;            
   align-items: center;
   justify-content: center;
@@ -43,9 +59,9 @@ body {
 .node-ellipse {
   width: 80px;               
   height: 50px;
-  border: 1px solid #000;
+  border: 1px solid var(--node-border);
   border-radius: 50%;        
-  background: white;
+  background: var(--node-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -63,8 +79,8 @@ body {
 .node-rombo {
   width: 60px;
   height: 60px;
-  border: 1px solid #000;
-  background: white;
+  border: 1px solid var(--node-border);
+  background: var(--node-bg);
   transform: rotate(45deg); /* Hace que se vea como rombo */
   display: flex;
   align-items: center;

@@ -96,8 +96,8 @@
 }
 
 .custom-dropdown {
-  background-color: #586673;
-  color: #fff;
+  /* background-color: #586673; */ /* Removed for theme compatibility */
+  /* color: #fff; */ /* Removed for theme compatibility */
   border: none;
   padding: 10px 12px;
   border-radius: 6px;
@@ -109,10 +109,6 @@
 .custom-dropdown.small {
   min-width: 120px;
   width: auto;
-}
-
-.custom-dropdown:hover {
-  background-color: #546980;
 }
 
 .custom-dropdown:focus {
@@ -131,7 +127,7 @@
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  color: #fff;
+  /* color: #fff; */ /* Color handled by sx prop in App.tsx */
   font-size: 0.7rem;
 }
 
@@ -139,12 +135,11 @@
    Post-it de la sección "Controles"
 -------------------------------------------- */
 .postit {
-  /*background: #fff475;
-    background-color: #546980;
-  */
-  background-image: linear-gradient(155deg, #546980c6, #546980);
+  /*background: #fff475;*/
+  /* background-color: #546980; */
+  /* background-image: linear-gradient(155deg, #546980c6, #546980); */ /* Removed for theme compatibility */
 
-  color: #333;
+  /* color: #333; */ /* Removed for theme compatibility */
   width: 320px;
   min-height: 120px;
   padding: 20px 18px;
@@ -226,4 +221,14 @@
 .top-right-text {
   color: #eee;
   font-size: 16px;
+}
+
+/* Fuerza el fondo y color de los controles de React Flow para que siempre sean blancos y no cambien con el tema */
+.react-flow__controls {
+  background: #fff !important;
+}
+.react-flow__controls-button {
+  background: #fff !important;
+  color: #222 !important;
+  border-bottom: 1px solid #eee !important;
 }

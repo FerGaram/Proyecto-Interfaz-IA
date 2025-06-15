@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   ReactFlow,
   Controls,
@@ -20,6 +20,14 @@ import { NodeTest } from "./components/nodes/NodeTest";
 import { NodeCircle } from "./components/nodes/NodeCircle";
 import { NodeEllipse } from "./components/nodes/NodeEllipse";
 import { NodeRombo } from "./components/nodes/NodeRombo";
+import { KeyboardShortcuts } from "./components/KeyboardShortcuts";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography'; // Import Typography
+import { NodeTypeDropdown } from './components/NodeTypeDropdown';
 
 // Aquí se deben importar los nodos personalizados que se hayan hecho
 const nodeTypes = {
@@ -142,98 +150,339 @@ function Flow() {
     });
   }, []);
 
+  // Historial para deshacer (Ctrl+Z) y rehacer (Ctrl+Y)
+  const [history, setHistory] = useState<{ nodes: defaultNodeModel[]; edges: defaultEdgeModel[] }[]>([]);
+  const [redoHistory, setRedoHistory] = useState<{ nodes: defaultNodeModel[]; edges: defaultEdgeModel[] }[]>([]);
+  // Portapapeles para copiar/pegar/cortar/duplicar
+  const clipboard = useRef<defaultNodeModel[] | null>(null);
+
+  // Guardar estado en historial
+  const saveToHistory = useCallback(() => {
+    setHistory((h) => [...h, { nodes: [...nodes], edges: [...edges] }]);
+    setRedoHistory([]); // Limpiar historial de rehacer al hacer una nueva acción
+  }, [nodes, edges]);
+
+  // Atajos de teclado
+  const getSelectedNodes = () => nodes.filter((n: any) => n.selected);
+
+  const handleUndo = useCallback(() => {
+    if (history.length === 0) return;
+    setRedoHistory((rh) => [...rh, { nodes: [...nodes], edges: [...edges] }]);
+    const prev = history[history.length - 1];
+    setNodes(prev.nodes);
+    setEdges(prev.edges);
+    setHistory((h) => h.slice(0, -1));
+  }, [history, nodes, edges]);
+
+  const handleRedo = useCallback(() => {
+    if (redoHistory.length === 0) return;
+    const next = redoHistory[redoHistory.length - 1];
+    saveToHistory(); // Guardar estado actual antes de rehacer
+    setNodes(next.nodes);
+    setEdges(next.edges);
+    setRedoHistory((rh) => rh.slice(0, -1));
+  }, [redoHistory, saveToHistory]);
+
+  const handleCopy = useCallback(() => {
+    clipboard.current = getSelectedNodes();
+  }, [nodes]);
+
+  const handlePaste = useCallback(() => {
+    if (clipboard.current && clipboard.current.length > 0) {
+      saveToHistory();
+      let idCounter = ultimoId.current;
+      const newNodes = clipboard.current.map((n) => {
+        idCounter++;
+        return {
+          ...n,
+          id: idCounter.toString(),
+          position: { x: n.position.x + 40, y: n.position.y + 40 },
+          selected: false,
+        };
+      });
+      ultimoId.current = idCounter;
+      setNodes((nds) => [...nds, ...newNodes]);
+    }
+  }, [saveToHistory]);
+
+  const handleCut = useCallback(() => {
+    saveToHistory();
+    clipboard.current = getSelectedNodes();
+    setNodes((nds) => nds.filter((n: any) => !n.selected));
+  }, [nodes, saveToHistory]);
+
+  const handleDuplicate = useCallback(() => {
+    const selected = getSelectedNodes();
+    if (selected.length > 0) {
+      saveToHistory();
+      let idCounter = ultimoId.current;
+      const newNodes = selected.map((n) => {
+        idCounter++;
+        return {
+          ...n,
+          id: idCounter.toString(),
+          position: { x: n.position.x + 40, y: n.position.y + 40 },
+          selected: false,
+        };
+      });
+      ultimoId.current = idCounter;
+      setNodes((nds) => [...nds, ...newNodes]);
+    }
+  }, [nodes, saveToHistory]);
+
+  // Tema oscuro/claro
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    document.body.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
+  const theme = createTheme({
+    palette: {
+      mode: darkMode ? "dark" : "light",
+    },
+  });
+
   // Devuelve la pantalla principal de React Flow
   return (
-    // Ocupa el tamaño completo de la pantalla del navegador
-    <div style={{ height: "100%" }}>
-      <ReactFlow
-        nodes={nodes} // Nodos iniciales
-        onNodesChange={onNodesChange} // Handler de cambios de nodos
-        nodeTypes={nodeTypes} // Tipos de nodos personalizados
-        edges={edges} // Aristas iniciales
-        onEdgesChange={onEdgesChange} // Handler de cambios de aristas
-        onConnect={onConnect} // Handler de conexiones
-        fitView // Ajusta la pantalla para contener y centrar los nodos iniciales
-        connectionMode={ConnectionMode.Loose} // Se define de esta forma para que los conectores puedan iniciar y terminar conexiones
-      >
-        <Background /* Fondo punteado */ />
-        <Controls /* Botones de la esquina inferior izquierda */ />
-        <MiniMap /* Minimapa de la esquina inferior derecha */ />
-        <Panel position="top-left">
-          <div className="panel-box">
-            <p className="top-left-text">
-              Nodo inicial:{" "}
-              {nodoInicial === "" ? "Sin seleccionar" : nodoInicial}
-            </p>
-            <p className="top-left-text">
-              Nodo final: {nodoFinal === "" ? "Sin seleccionar" : nodoFinal}
-            </p>
-          </div>
-        </Panel>
-        <Panel position="top-center">
-          <>
-            <div className="top-panel">
-              <div className="add-node-controls-inline">
-                <div className="dropdown-wrapper">
-                  <select
-                    value={selectedType}
-                    onChange={(e) => setSelectedType(e.target.value)}
-                    className="custom-dropdown small"
-                  >
-                    {nodeTypesArray.map((node) => (
-                      <option key={node.value} value={node.value}>
-                        {node.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <button onClick={addNode} className="custom-btn">
-                  Añadir nuevo nodo
-                </button>
-                <button onClick={limpiarPantalla} className="custom-btn">
-                  Limpiar pantalla
-                </button>
-                <button onClick={pruebaOnClick} className="test-btn">
-                  Imprimir nodos y aristas en consola
-                </button>
-              </div>
-            </div>
-          </>
-        </Panel>
-        <Panel
-          position="top-right" /* Panel para mostrar controles en la esquina superior derecha */
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {/* Ocupa el tamaño completo de la pantalla del navegador */}
+      <div style={{ height: "100%" }}>
+        <KeyboardShortcuts
+          onUndo={handleUndo}
+          onRedo={handleRedo} // <-- Prop onRedo añadida
+          onCopy={handleCopy}
+          onPaste={handlePaste}
+          onCut={handleCut}
+          onDuplicate={handleDuplicate}
+        />
+        <ReactFlow
+          nodes={nodes} // Nodos iniciales
+          onNodesChange={onNodesChange} // Handler de cambios de nodos
+          nodeTypes={nodeTypes} // Tipos de nodos personalizados
+          edges={edges} // Aristas iniciales
+          onEdgesChange={onEdgesChange} // Handler de cambios de aristas
+          onConnect={onConnect} // Handler de conexiones
+          fitView // Ajusta la pantalla para contener y centrar los nodos iniciales
+          connectionMode={ConnectionMode.Loose} // Se define de esta forma para que los conectores puedan iniciar y terminar conexiones
         >
-          <div
-            className={`postit${minimized ? " minimized" : ""}`}
-            onClick={() => setMinimized(!minimized)}
-            style={{ cursor: "pointer" }}
-            title="Haz clic para expandir o reducir"
+          <Background /* Fondo punteado */ />
+          <Controls /* Botones de la esquina inferior izquierda */ />
+          <MiniMap /* Minimapa de la esquina inferior derecha */ />
+          <Panel position="top-left">
+            <Box
+              className="panel-box"
+              sx={{
+                bgcolor: 'background.paper',
+                color: 'text.primary',
+                border: '1.5px solid',
+                borderColor: 'divider',
+                borderRadius: '10px',
+                padding: '14px 18px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                fontSize: '1rem',
+                minWidth: '180px',
+                margin: '8px 0',
+              }}
+            >
+              <Typography className="top-left-text" sx={{ color: 'text.primary', fontSize: '16px' }}>
+                Nodo inicial:{" "}
+                {nodoInicial === "" ? "Sin seleccionar" : nodoInicial}
+              </Typography>
+              <Typography className="top-left-text" sx={{ color: 'text.primary', fontSize: '16px' }}>
+                Nodo final: {nodoFinal === "" ? "Sin seleccionar" : nodoFinal}
+              </Typography>
+            </Box>
+          </Panel>
+          <Panel position="top-center">
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 2,
+                bgcolor: darkMode ? 'rgba(30,30,40,0.55)' : 'rgba(220,220,230,0.75)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
+                padding: '16px 32px',
+                margin: '0 auto',
+                minWidth: 600,
+                maxWidth: '90vw',
+              }}
+            >
+              <NodeTypeDropdown
+                selectedType={selectedType}
+                setSelectedType={setSelectedType}
+                nodeTypesArray={nodeTypesArray}
+              />
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    minWidth: 180,
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    borderRadius: '8px',
+                    boxShadow: 'none',
+                    backdropFilter: 'blur(8px)',
+                    bgcolor: darkMode ? 'rgba(40,60,90,0.85)' : 'background.paper',
+                    color: darkMode ? 'primary.main' : 'primary.dark',
+                    border: '1.5px solid',
+                    borderColor: 'primary.main',
+                    '&:hover': { bgcolor: darkMode ? 'rgba(40,60,120,0.95)' : 'grey.100' }
+                  }}
+                  onClick={addNode}
+                >
+                  AÑADIR NUEVO NODO
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  sx={{
+                    minWidth: 180,
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    borderRadius: '8px',
+                    boxShadow: 'none',
+                    backdropFilter: 'blur(8px)',
+                    bgcolor: darkMode ? 'rgba(80,60,120,0.7)' : 'background.paper',
+                    color: darkMode ? 'secondary.light' : 'secondary.dark',
+                    border: '1.5px solid',
+                    borderColor: 'secondary.main',
+                    '&:hover': { bgcolor: darkMode ? 'rgba(120,80,180,0.85)' : 'grey.100' }
+                  }}
+                  onClick={limpiarPantalla}
+                >
+                  LIMPIAR PANTALLA
+                </Button>
+                <Button
+                  variant="text"
+                  color="info"
+                  sx={{
+                    minWidth: 180,
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    borderRadius: '8px',
+                    boxShadow: 'none',
+                    backdropFilter: 'blur(8px)',
+                    bgcolor: darkMode ? 'rgba(40,80,90,0.7)' : 'background.paper',
+                    color: darkMode ? 'info.light' : 'info.dark',
+                    border: '1.5px solid',
+                    borderColor: 'info.main',
+                    '&:hover': { bgcolor: darkMode ? 'rgba(40,120,140,0.85)' : 'grey.100' }
+                  }}
+                  onClick={pruebaOnClick}
+                >
+                  IMPRIMIR NODOS Y ARISTAS
+                </Button>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    minWidth: 180,
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    borderRadius: '8px',
+                    boxShadow: 'none',
+                    backdropFilter: 'blur(8px)',
+                    bgcolor: darkMode ? 'rgba(40,60,90,0.5)' : 'background.paper',
+                    color: darkMode ? 'primary.light' : 'primary.dark',
+                    border: '1.5px solid',
+                    borderColor: 'primary.main',
+                    '&:hover': { bgcolor: darkMode ? 'rgba(40,60,120,0.7)' : 'grey.100' }
+                  }}
+                  onClick={() => setDarkMode(!darkMode)}
+                >
+                  {darkMode ? 'MODO CLARO' : 'MODO OSCURO'}
+                </Button>
+              </Stack>
+            </Box>
+          </Panel>
+          <Panel
+            position="top-right" /* Panel para mostrar controles en la esquina superior derecha */
           >
-            <center>
-              <h4 className="top-right-header">Controles</h4>
-            </center>
-            <ul className="top-right-text">
-              <li>Desplazarse: haz clic fuera de un nodo y arrastra</li>
-              <li>
-                Seleccionar múltiples nodos: Shift + clic y arrastra para
-                seleccionar múltiples nodos y aristas
-              </li>
-              <li>Borrar nodo/arista: haz clic y pulsa Retroceso</li>
-              <li>
-                Conectar nodos: haz clic y arrastra desde un conector, y suelta
-                en otro del nodo a conectar
-              </li>
-            </ul>
-          </div>
-        </Panel>
-        <Panel
-          position="bottom-center" /* Panel para mostrar opciones de algoritmos */
-        >
-          <>Usen este panel para elegir algoritmos</>
-        </Panel>
-      </ReactFlow>
-    </div>
+            <Box
+              className={`postit${minimized ? " minimized" : ""}`}
+              onClick={() => setMinimized(!minimized)}
+              sx={{
+                bgcolor: darkMode ? 'rgba(40,40,40,0.96)' : 'background.paper',
+                color: 'text.primary',
+                width: minimized ? '80px' : '320px',
+                minHeight: minimized ? '32px' : '120px',
+                padding: minimized ? '10px 8px' : '20px 18px',
+                borderRadius: '10px 40px 10px 10px',
+                boxShadow: '2px 4px 16px rgba(0, 0, 0, 0.15)',
+                fontFamily: '\'Segoe UI\', Arial, sans-serif',
+                fontSize: minimized ? '0.9rem' : '1rem',
+                margin: '24px auto',
+                position: 'relative',
+                transition: 'all 0.3s cubic-bezier(.4, 2, .6, 1)',
+                overflow: 'hidden',
+                display: 'block',
+                textAlign: minimized ? 'center' : 'left',
+                cursor: 'pointer',
+                '&:hover': {
+                  boxShadow: '4px 8px 24px rgba(0, 0, 0, 0.2)',
+                },
+                '& .top-right-header': {
+                  color: 'text.primary',
+                  fontSize: '18px',
+                  marginTop: 0,
+                  marginBottom: '10px',
+                },
+                '& .top-right-text': {
+                  color: 'text.secondary',
+                  fontSize: '16px',
+                  margin: 0,
+                  paddingLeft: '18px',
+                  '& li': {
+                    marginBottom: '8px',
+                  }
+                },
+                '& .minimized ul, & .minimized h4, & .minimized br': {
+                    display: 'none',
+                }
+              }}
+              title="Haz clic para expandir o reducir"
+            >
+              <center>
+                <h4 className="top-right-header">Controles</h4>
+              </center>
+              <ul className="top-right-text">
+                <li>Desplazarse: haz clic fuera de un nodo y arrastra</li>
+                <li>
+                  Seleccionar múltiples nodos: Shift + clic y arrastra para
+                  seleccionar múltiples nodos y aristas
+                </li>
+                <li>Borrar nodo/arista: haz clic y pulsa Retroceso</li>
+                <li>
+                  Conectar nodos: haz clic y arrastra desde un conector, y suelta
+                  en otro del nodo a conectar
+                </li>
+              </ul>
+              <div style={{ fontSize: '0.75rem', color: theme.palette.text.secondary, marginTop: 8 }}>
+                <b>Atajos útiles:</b>
+                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                  <li><b>Ctrl+Z</b>: Deshacer</li>
+                  <li><b>Ctrl+Y</b>: Rehacer</li> {/* <-- Añadido atajo Ctrl+Y */} 
+                  <li><b>Ctrl+C</b>: Copiar nodo(s) seleccionado(s)</li>
+                  <li><b>Ctrl+V</b>: Pegar nodo(s)</li>
+                  <li><b>Ctrl+X</b>: Cortar nodo(s)</li>
+                  <li><b>Ctrl+D</b>: Duplicar nodo(s)</li>
+                </ul>
+              </div>
+            </Box>
+          </Panel>
+          <Panel
+            position="bottom-center" /* Panel para mostrar opciones de algoritmos */
+          >
+            <>Usen este panel para elegir algoritmos</>
+          </Panel>
+        </ReactFlow>
+      </div>
+    </ThemeProvider>
   );
 }
 
