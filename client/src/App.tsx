@@ -20,6 +20,9 @@ import { NodeTest } from "./components/nodes/NodeTest";
 import { NodeCircle } from "./components/nodes/NodeCircle";
 import { NodeEllipse } from "./components/nodes/NodeEllipse";
 import { NodeRombo } from "./components/nodes/NodeRombo";
+import { KeyboardShortcuts } from "./components/KeyboardShortcuts";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
 
 // Aquí se deben importar los nodos personalizados que se hayan hecho
 const nodeTypes = {
@@ -142,10 +145,79 @@ function Flow() {
     });
   }, []);
 
+  // Historial para deshacer (Ctrl+Z)
+  const [history, setHistory] = useState<{ nodes: defaultNodeModel[]; edges: defaultEdgeModel[] }[]>([]);
+  // Portapapeles para copiar/pegar/cortar/duplicar
+  const clipboard = useRef<defaultNodeModel[] | null>(null);
+
+  // Guardar estado en historial
+  const saveToHistory = useCallback(() => {
+    setHistory((h) => [...h, { nodes: [...nodes], edges: [...edges] }]);
+  }, [nodes, edges]);
+
+  // Atajos de teclado
+  const getSelectedNodes = () => nodes.filter((n: any) => n.selected);
+
+  const handleUndo = useCallback(() => {
+    setHistory((h) => {
+      if (h.length === 0) return h;
+      const prev = h[h.length - 1];
+      setNodes(prev.nodes);
+      setEdges(prev.edges);
+      return h.slice(0, -1);
+    });
+  }, []);
+
+  const handleCopy = useCallback(() => {
+    clipboard.current = getSelectedNodes();
+  }, [nodes]);
+
+  const handlePaste = useCallback(() => {
+    if (clipboard.current && clipboard.current.length > 0) {
+      saveToHistory();
+      const newNodes = clipboard.current.map((n) => ({
+        ...n,
+        id: (ultimoId.current + 1).toString(),
+        position: { x: n.position.x + 40, y: n.position.y + 40 },
+        selected: false,
+      }));
+      ultimoId.current += newNodes.length;
+      setNodes((nds) => [...nds, ...newNodes]);
+    }
+  }, [saveToHistory]);
+
+  const handleCut = useCallback(() => {
+    saveToHistory();
+    clipboard.current = getSelectedNodes();
+    setNodes((nds) => nds.filter((n: any) => !n.selected));
+  }, [nodes, saveToHistory]);
+
+  const handleDuplicate = useCallback(() => {
+    const selected = getSelectedNodes();
+    if (selected.length > 0) {
+      saveToHistory();
+      const newNodes = selected.map((n) => ({
+        ...n,
+        id: (ultimoId.current + 1).toString(),
+        position: { x: n.position.x + 40, y: n.position.y + 40 },
+        selected: false,
+      }));
+      ultimoId.current += newNodes.length;
+      setNodes((nds) => [...nds, ...newNodes]);
+    }
+  }, [nodes, saveToHistory]);
+
   // Devuelve la pantalla principal de React Flow
   return (
     // Ocupa el tamaño completo de la pantalla del navegador
     <div style={{ height: "100%" }}>
+      <KeyboardShortcuts
+        onUndo={handleUndo}
+        onCopy={handleCopy}
+        onPaste={handlePaste}
+        onCut={handleCut}
+        onDuplicate={handleDuplicate}
+      />
       <ReactFlow
         nodes={nodes} // Nodos iniciales
         onNodesChange={onNodesChange} // Handler de cambios de nodos
@@ -187,16 +259,29 @@ function Flow() {
                     ))}
                   </select>
                 </div>
-
-                <button onClick={addNode} className="custom-btn">
-                  Añadir nuevo nodo
-                </button>
-                <button onClick={limpiarPantalla} className="custom-btn">
-                  Limpiar pantalla
-                </button>
-                <button onClick={pruebaOnClick} className="test-btn">
-                  Imprimir nodos y aristas en consola
-                </button>
+                <Stack direction="row" spacing={2}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={addNode}
+                  >
+                    Añadir nuevo nodo
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={limpiarPantalla}
+                  >
+                    Limpiar pantalla
+                  </Button>
+                  <Button
+                    variant="text"
+                    color="info"
+                    onClick={pruebaOnClick}
+                  >
+                    Imprimir nodos y aristas
+                  </Button>
+                </Stack>
               </div>
             </div>
           </>
@@ -225,6 +310,16 @@ function Flow() {
                 en otro del nodo a conectar
               </li>
             </ul>
+            <div style={{ fontSize: '0.75rem', color: '#eee', marginTop: 8 }}>
+              <b>Atajos útiles:</b>
+              <ul style={{ margin: 0, paddingLeft: 18 }}>
+                <li><b>Ctrl+Z</b>: Deshacer</li>
+                <li><b>Ctrl+C</b>: Copiar nodo(s) seleccionado(s)</li>
+                <li><b>Ctrl+V</b>: Pegar nodo(s)</li>
+                <li><b>Ctrl+X</b>: Cortar nodo(s)</li>
+                <li><b>Ctrl+D</b>: Duplicar nodo(s)</li>
+              </ul>
+            </div>
           </div>
         </Panel>
         <Panel
