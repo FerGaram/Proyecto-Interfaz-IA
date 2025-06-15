@@ -161,11 +161,11 @@ function Flow() {
         <MiniMap /* Minimapa de la esquina inferior derecha */ />
         <Panel position="top-left">
           <div className="panel-box">
-            <p>
+            <p className="top-left-text">
               Nodo inicial:{" "}
               {nodoInicial === "" ? "Sin seleccionar" : nodoInicial}
             </p>
-            <p>
+            <p className="top-left-text">
               Nodo final: {nodoFinal === "" ? "Sin seleccionar" : nodoFinal}
             </p>
           </div>
@@ -211,20 +211,18 @@ function Flow() {
             title="Haz clic para expandir o reducir"
           >
             <center>
-              <h4>Controles</h4>
+              <h4 className="top-right-header">Controles</h4>
             </center>
-            <ul>
+            <ul className="top-right-text">
               <li>Desplazarse: haz clic fuera de un nodo y arrastra</li>
               <li>
-                Seleccionar múltiples nodos: Shift + clic y arrastra
-                <br />
-                para seleccionar múltiples nodos y aristas
+                Seleccionar múltiples nodos: Shift + clic y arrastra para
+                seleccionar múltiples nodos y aristas
               </li>
               <li>Borrar nodo/arista: haz clic y pulsa Retroceso</li>
               <li>
-                Conectar nodos: haz clic y arrastra desde un
-                <br />
-                conector, y suelta en otro del nodo a conectar
+                Conectar nodos: haz clic y arrastra desde un conector, y suelta
+                en otro del nodo a conectar
               </li>
             </ul>
           </div>

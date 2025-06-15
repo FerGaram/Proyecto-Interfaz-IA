@@ -74,7 +74,7 @@ body {
 }
 
 /* Contenido rotado de regreso para que se lea normal */
-.rombo-content {
+.rhombus-content {
   transform: rotate(-45deg);
   text-align: center;
   font-size: 12px;

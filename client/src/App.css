@@ -212,3 +212,18 @@
   margin: 8px 0;
 
 }
+
+.top-left-text {
+  color: #eee;
+  font-size: 16px;
+}
+
+.top-right-header {
+  color: #eee;
+  font-size: 18px;
+}
+
+.top-right-text {
+  color: #eee;
+  font-size: 16px;
+}
