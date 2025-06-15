@@ -84,6 +84,9 @@ function Flow() {
   const [nodoInicial] = useState("");
   const [nodoFinal] = useState("");
 
+  // Hook para el estado del panel minimizable
+  const [minimized, setMinimized] = useState(false);
+
   // Handler para añadir/modificar/eliminar nodos, no hace falta modificar
   const onNodesChange = useCallback(
     (changes: NodeChange<defaultNodeModel>[]) =>
@@ -155,7 +158,7 @@ function Flow() {
         <Controls /* Botones de la esquina inferior izquierda */ />
         <MiniMap /* Minimapa de la esquina inferior derecha */ />
         <Panel position="top-left">
-          <>
+          <div className="panel-box">
             <p>
               Nodo inicial:{" "}
               {nodoInicial === "" ? "Sin seleccionar" : nodoInicial}
@@ -163,7 +166,7 @@ function Flow() {
             <p>
               Nodo final: {nodoFinal === "" ? "Sin seleccionar" : nodoFinal}
             </p>
-          </>
+          </div>
         </Panel>
         <Panel position="top-center">
           <>
@@ -196,12 +199,33 @@ function Flow() {
             </div>
 
             <div className="main-content">{/* ... */}</div>
+
+        <Panel
+          position="top-center" /* Panel para mostrar botones de prueba en parte superior */
+        >
+          <>
+            <div className="top-panel">
+              <button onClick={addNode} className="custom-btn">
+                Añadir nuevo nodo
+              </button>
+              <button onClick={limpiarPantalla} className="custom-btn">
+                Limpiar pantalla
+              </button>
+              <button onClick={pruebaOnClick} className="custom-btn">
+                Imprimir nodos y aristas en consola
+              </button>
+            </div>
           </>
         </Panel>
         <Panel
           position="top-right" /* Panel para mostrar controles en la esquina superior derecha */
         >
-          <>
+          <div
+            className={`postit${minimized ? " minimized" : ""}`}
+            onClick={() => setMinimized(!minimized)}
+            style={{ cursor: "pointer" }}
+            title="Haz clic para expandir o reducir"
+          >
             <center>
               <h4>Controles</h4>
             </center>
@@ -219,7 +243,7 @@ function Flow() {
                 conector, y suelta en otro del nodo a conectar
               </li>
             </ul>
-          </>
+          </div>
         </Panel>
         <Panel
           position="bottom-center" /* Panel para mostrar opciones de algoritmos */
