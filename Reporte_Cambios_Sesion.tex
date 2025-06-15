@@ -1,0 +1,251 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{longtable}
+\geometry{margin=1in}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegray},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{red},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+\title{Reporte de Cambios - Sesión de Desarrollo}
+\author{Jose Ramon Aragon Toledo}
+\date{15 de junio de 2025}
+
+\begin{document}
+
+\maketitle
+
+\section*{Resumen de Cambios}
+Durante esta sesión de desarrollo se realizaron mejoras significativas en la interfaz y experiencia de usuario del proyecto, destacando:
+\begin{itemize}
+    \item Integración de Material UI para botones principales.
+    \item Implementación de atajos de teclado (Ctrl+Z, Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+D) para manipulación de nodos.
+    \item Visualización de los atajos en el panel lateral derecho superior.
+    \item Refactorización para compatibilidad con React Flow y mejores prácticas de código.
+\end{itemize}
+
+\section*{Fragmentos de Código Relevantes}
+\subsection*{1. Integración de Atajos de Teclado}
+\textbf{Archivo: src/components/KeyboardShortcuts.tsx}
+\begin{lstlisting}[language=JavaScript, caption=KeyboardShortcuts.tsx]
+import { useEffect } from "react";
+
+interface KeyboardShortcutsProps {
+  onUndo: () => void;
+  onCopy: () => void;
+  onPaste: () => void;
+  onCut: () => void;
+  onDuplicate: () => void;
+}
+
+export const KeyboardShortcuts = ({
+  onUndo,
+  onCopy,
+  onPaste,
+  onCut,
+  onDuplicate,
+}: KeyboardShortcutsProps) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey) {
+        switch (e.key.toLowerCase()) {
+          case "z":
+            e.preventDefault();
+            onUndo();
+            break;
+          case "c":
+            e.preventDefault();
+            onCopy();
+            break;
+          case "v":
+            e.preventDefault();
+            onPaste();
+            break;
+          case "x":
+            e.preventDefault();
+            onCut();
+            break;
+          case "d":
+            e.preventDefault();
+            onDuplicate();
+            break;
+          default:
+            break;
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onUndo, onCopy, onPaste, onCut, onDuplicate]);
+  return null;
+};
+\end{lstlisting}
+
+\subsection*{2. Lógica de Atajos y Portapapeles}
+\textbf{Archivo: src/App.tsx}
+\begin{lstlisting}[language=JavaScript, caption=Fragmento de integración de atajos en App.tsx]
+// ...existing code...
+const getSelectedNodes = () => nodes.filter((n: any) => n.selected);
+
+const handleCopy = useCallback(() => {
+  clipboard.current = getSelectedNodes();
+}, [nodes]);
+
+const handlePaste = useCallback(() => {
+  if (clipboard.current && clipboard.current.length > 0) {
+    saveToHistory();
+    let idCounter = ultimoId.current;
+    const newNodes = clipboard.current.map((n) => {
+      idCounter++;
+      return {
+        ...n,
+        id: idCounter.toString(),
+        position: { x: n.position.x + 40, y: n.position.y + 40 },
+        selected: false,
+      };
+    });
+    ultimoId.current = idCounter;
+    setNodes((nds) => [...nds, ...newNodes]);
+  }
+}, [saveToHistory]);
+
+const handleCut = useCallback(() => {
+  saveToHistory();
+  clipboard.current = getSelectedNodes();
+  setNodes((nds) => nds.filter((n: any) => !n.selected));
+}, [nodes, saveToHistory]);
+
+const handleDuplicate = useCallback(() => {
+  const selected = getSelectedNodes();
+  if (selected.length > 0) {
+    saveToHistory();
+    const newNodes = selected.map((n) => ({
+      ...n,
+      id: (ultimoId.current + 1).toString(),
+      position: { x: n.position.x + 40, y: n.position.y + 40 },
+      selected: false,
+    }));
+    ultimoId.current += newNodes.length;
+    setNodes((nds) => [...nds, ...newNodes]);
+  }
+}, [nodes, saveToHistory]);
+// ...existing code...
+\end{lstlisting}
+
+\subsection*{3. Visualización de Atajos en el Panel Lateral}
+\textbf{Archivo: src/App.tsx}
+\begin{lstlisting}[language=JavaScript, caption=Panel lateral con atajos]
+<div style={{ fontSize: '0.75rem', color: '#eee', marginTop: 8 }}>
+  <b>Atajos útiles:</b>
+  <ul style={{ margin: 0, paddingLeft: 18 }}>
+    <li><b>Ctrl+Z</b>: Deshacer</li>
+    <li><b>Ctrl+C</b>: Copiar nodo(s) seleccionado(s)</li>
+    <li><b>Ctrl+V</b>: Pegar nodo(s)</li>
+    <li><b>Ctrl+X</b>: Cortar nodo(s)</li>
+    <li><b>Ctrl+D</b>: Duplicar nodo(s)</li>
+  </ul>
+</div>
+\end{lstlisting}
+
+\section*{Mejoras de Estética y Experiencia}
+Se unificó la estética de todos los botones, listas desplegables y paneles principales:
+\begin{itemize}
+    \item Todos los botones y dropdowns tienen el mismo tamaño, separación y están alineados y centrados.
+    \item Se aplicó fondo transparente con efecto blur a los paneles y controles principales.
+    \item Los colores de los botones se adaptan al modo claro/oscuro y a la función de cada uno, pero mantienen coherencia visual.
+    \item El panel de controles (post-it) ahora tiene mejor contraste y legibilidad en modo oscuro.
+    \item Se corrigió el fondo de los controles nativos de React Flow para que no cambien de color.
+\end{itemize}
+
+\subsection*{Fragmento: Unificación de botones y panel superior}
+\textbf{Archivo: src/App.tsx}
+\begin{lstlisting}[language=JavaScript, caption=Panel superior con botones unificados]
+<Panel position="top-center">
+  <Box sx={{
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2,
+    bgcolor: darkMode ? 'rgba(30,30,40,0.55)' : 'rgba(220,220,230,0.75)',
+    backdropFilter: 'blur(8px)', borderRadius: '12px', boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
+    padding: '16px 32px', margin: '0 auto', minWidth: 600, maxWidth: '90vw',
+  }}>
+    <NodeTypeDropdown ... />
+    <Stack direction="row" spacing={2} alignItems="center">
+      <Button ...>AÑADIR NUEVO NODO</Button>
+      <Button ...>LIMPIAR PANTALLA</Button>
+      <Button ...>IMPRIMIR NODOS Y ARISTAS</Button>
+      <Button ...>{darkMode ? 'MODO CLARO' : 'MODO OSCURO'}</Button>
+    </Stack>
+  </Box>
+</Panel>
+\end{lstlisting}
+
+\subsection*{Corrección de IDs únicos al duplicar/copiar/pegar}
+\textbf{Archivo: src/App.tsx}
+\begin{lstlisting}[language=JavaScript, caption=IDs únicos en duplicado y pegado]
+const handlePaste = useCallback(() => {
+  if (clipboard.current && clipboard.current.length > 0) {
+    saveToHistory();
+    let idCounter = ultimoId.current;
+    const newNodes = clipboard.current.map((n) => {
+      idCounter++;
+      return {
+        ...n,
+        id: idCounter.toString(),
+        position: { x: n.position.x + 40, y: n.position.y + 40 },
+        selected: false,
+      };
+    });
+    ultimoId.current = idCounter;
+    setNodes((nds) => [...nds, ...newNodes]);
+  }
+}, [saveToHistory]);
+\end{lstlisting}
+
+\subsection*{Ajuste de contraste en panel de controles}
+\textbf{Archivo: src/App.tsx}
+\begin{lstlisting}[language=JavaScript, caption=Panel de controles con fondo adaptativo]
+<Box
+  className={`postit${minimized ? " minimized" : ""}`}
+  ...
+  sx={{
+    bgcolor: darkMode ? 'rgba(40,40,40,0.96)' : 'background.paper',
+    ...
+  }}
+>
+\end{lstlisting}
+
+\section*{Tabla de Cambios Ampliada}
+\begin{longtable}{|p{3cm}|p{4cm}|p{4cm}|p{4cm}|}
+\hline
+\textbf{Diferencia} & \textbf{Antes} & \textbf{Después} & \textbf{¿Por qué se hizo el cambio?} \\
+\hline
+Unificación de botones y paneles & Botones y paneles con estilos variados & Todos con mismo tamaño, alineación, efecto blur y colores adaptativos & Mejorar coherencia visual y experiencia de usuario \\
+\hline
+IDs únicos en duplicado/pegado & IDs duplicados al copiar/duplicar varios nodos & IDs únicos e incrementales para cada nodo nuevo & Evitar conflictos y nodos invisibles \\
+\hline
+Contraste en panel de controles & Fondo opaco dificultaba lectura en modo oscuro & Fondo más sólido y texto legible en ambos modos & Mejorar accesibilidad y legibilidad \\
+\hline
+Colores adaptativos & Colores fijos en modo claro/oscuro & Colores y fondos que se adaptan al tema & Consistencia visual y accesibilidad \\
+\hline
+\end{longtable}
+
+\end{document}
