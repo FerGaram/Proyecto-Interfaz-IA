@@ -22,7 +22,12 @@ import { NodeEllipse } from "./components/nodes/NodeEllipse";
 import { NodeRombo } from "./components/nodes/NodeRombo";
 
 // Aquí se deben importar los nodos personalizados que se hayan hecho
-const nodeTypes = { nodeTest: NodeTest, nodeCircle: NodeCircle, nodeEllipse: NodeEllipse, nodeRombo: NodeRombo };
+const nodeTypes = {
+  nodeTest: NodeTest,
+  nodeCircle: NodeCircle,
+  nodeEllipse: NodeEllipse,
+  nodeRombo: NodeRombo,
+};
 
 // Lista de nodos iniciales de prueba, se podrían borrar más adelante
 const nodosIniciales: Array<defaultNodeModel> = [
@@ -44,7 +49,6 @@ const nodosIniciales: Array<defaultNodeModel> = [
     data: { label: "3" },
     type: "nodeRombo",
   },
-
 ];
 
 // Lista de aristas iniciales de prueba, se podrían borrar más adelante
@@ -66,7 +70,6 @@ const nodeTypesArray = [
   { label: "Rombo", value: "nodeRombo" },
   // Agrega aquí tus tipos personalizados
 ];
-
 
 // Función principal
 function Flow() {
@@ -107,7 +110,6 @@ function Flow() {
       },
     ]);
   }, [selectedType]);
-
 
   // Handler para añadir/modificar/eliminar aristas, no hace falta modificar
   const onEdgesChange = useCallback(
@@ -197,9 +199,8 @@ function Flow() {
                 </button>
               </div>
             </div>
-
-            <div className="main-content">{/* ... */}</div>
-
+          </>
+        </Panel>
         <Panel
           position="top-center" /* Panel para mostrar botones de prueba en parte superior */
         >
