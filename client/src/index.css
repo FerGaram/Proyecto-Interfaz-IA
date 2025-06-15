@@ -47,6 +47,14 @@ body:not([data-theme='dark']) {
   margin-top: 2px;
   white-space: nowrap;
 }
+.editable-input {
+  width: 90%;
+  padding: 4px;
+  font-size: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+}
 
 .node-circle {
   width: 50px;              
