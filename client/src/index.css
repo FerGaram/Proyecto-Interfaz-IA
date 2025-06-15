@@ -36,6 +36,18 @@ body:not([data-theme='dark']) {
   display: block;
   font-size: 12px;
 }
+.node-coords {
+  position: absolute;
+  top: 100%;      
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: #888;
+  pointer-events: none;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
 .node-circle {
   width: 50px;              
   height: 50px;
