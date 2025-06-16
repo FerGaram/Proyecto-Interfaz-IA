@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Tuple, List
 from app.Busquedas import (
@@ -12,6 +13,14 @@ from app.Busquedas import (
 )
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # O ["*"] para pruebas
+    allow_credentials=True,
+    allow_methods=["*"],  # Esto permite POST, GET, OPTIONS, etc.
+    allow_headers=["*"],
+)
 
 class GrafoInput(BaseModel):
     nodos: Dict[str, Tuple[float, float]] = {}
