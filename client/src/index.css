@@ -172,6 +172,7 @@ body:not([data-theme='dark']) {
   top: 100%;
   left: 115%;
   transform: translateX(-50%) rotate(-45deg); /* ← esto corrige la inclinación */
+  font-size: 9px;
   color: #888;
   white-space: nowrap;
   pointer-events: none;
