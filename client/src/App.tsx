@@ -74,7 +74,7 @@ const aristasIniciales: Array<defaultEdgeModel> = [
 ];
 
 const nodeTypesArray = [
-  { label: "Cuadro", value: "nodeTest" },
+  { label: "Rectáng.", value: "nodeTest" },
   { label: "Círculo", value: "nodeCircle" },
   { label: "Elipse", value: "nodeEllipse" },
   { label: "Rombo", value: "nodeRombo" },
