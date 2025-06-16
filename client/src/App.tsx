@@ -28,13 +28,9 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography'; // Import Typography
-<<<<<<< Updated upstream
 import { NodeTypeDropdown } from './components/NodeTypeDropdown';
-=======
 import { convertirAGrafoJSON } from './controllers/toFromJson'
 import { CloudDropdown } from './components/CloudDropdown';
-
->>>>>>> Stashed changes
 
 // Aquí se deben importar los nodos personalizados que se hayan hecho
 const nodeTypes = {
@@ -79,11 +75,7 @@ const aristasIniciales: Array<defaultEdgeModel> = [
 ];
 
 const nodeTypesArray = [
-<<<<<<< Updated upstream
-  { label: "Cuadro", value: "nodeTest" },
-=======
   { label: "Rectángulo", value: "nodeTest" },
->>>>>>> Stashed changes
   { label: "Círculo", value: "nodeCircle" },
   { label: "Elipse", value: "nodeEllipse" },
   { label: "Rombo", value: "nodeRombo" },
@@ -136,7 +128,8 @@ function Flow() {
   // Hooks para obtener y asignar nuevos nodos y aristas
   const [nodes, setNodes] = useState(nodosIniciales);
   const [edges, setEdges] = useState(aristasIniciales);
-
+  const [algoritmo, setAlgoritmo] = useState('BFS')
+  const [modoSeleccion, setModoSeleccion] = useState<"inicio" | "final" | null>(null)
   // Hooks para conservar el último ID de nodo añadido
   const ultimoId = useRef(3); // Está así para contar las dos iniciales, si esas se borran, recuerden cambiar este valor
   // Valores para coordenadas que se usan cuando se añade un nodo individual
@@ -144,8 +137,8 @@ function Flow() {
   const yPos = useRef(50);
 
   // Hooks para almacenar los nodos iniciales y finales
-  const [nodoInicial] = useState("");
-  const [nodoFinal] = useState("");
+  const [nodoInicial, setNodoInicial] = useState('')
+  const [nodoFinal, setNodoFinal] = useState('')
 
   // Hook para el estado del panel minimizable
   const [minimized, setMinimized] = useState(false);
@@ -180,10 +173,20 @@ function Flow() {
 
   // Handler para manejar la conexión de nodos, no hace falta modificar
   const onConnect = useCallback(
-    (params: import("@xyflow/react").Connection) =>
-      setEdges((eds) => addEdge(params, eds)),
+    (params: any) => {
+      const nuevoPeso = prompt("Ingrese el peso de la arista:", "1.0") || "1.0"
+      const pesoNum = parseFloat(nuevoPeso)
+
+      const edgeConPeso = {
+        ...params,
+        label: nuevoPeso,
+        data: { peso: pesoNum },
+      }
+
+      setEdges((eds) => addEdge(edgeConPeso, eds))
+    },
     []
-  );
+  )
 
   // Handler para botón de prueba, muestra en la consola la estructura de los nodos y aristas
   const pruebaOnClick = () => {
@@ -202,8 +205,6 @@ function Flow() {
     });
   }, []);
 
-<<<<<<< Updated upstream
-=======
   const ejecutarAlgoritmo = async () => {
     if (!nodoInicial || !nodoFinal) {
       alert("Selecciona nodo inicial y final.")
@@ -230,7 +231,6 @@ function Flow() {
     }
   }
 
->>>>>>> Stashed changes
   // Historial para deshacer (Ctrl+Z) y rehacer (Ctrl+Y)
   const [history, setHistory] = useState<{ nodes: defaultNodeModel[]; edges: defaultEdgeModel[] }[]>([]);
   const [redoHistory, setRedoHistory] = useState<{ nodes: defaultNodeModel[]; edges: defaultEdgeModel[] }[]>([]);
@@ -345,8 +345,6 @@ function Flow() {
           edges={edges} // Aristas iniciales
           onEdgesChange={onEdgesChange} // Handler de cambios de aristas
           onConnect={onConnect} // Handler de conexiones
-<<<<<<< Updated upstream
-=======
           onNodeClick={(_, node) => {
             if (modoSeleccion === "inicio") {
               setNodoInicial(node.id)
@@ -356,9 +354,9 @@ function Flow() {
               setModoSeleccion(null)
             }
           }}
->>>>>>> Stashed changes
           fitView // Ajusta la pantalla para contener y centrar los nodos iniciales
           connectionMode={ConnectionMode.Loose} // Se define de esta forma para que los conectores puedan iniciar y terminar conexiones
+          colorMode={darkMode ? "dark" : "light"}
         >
           <Background /* Fondo punteado */ />
           <Controls /* Botones de la esquina inferior izquierda */ />
@@ -381,19 +379,40 @@ function Flow() {
                 padding: '14px 18px',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
                 fontSize: '1rem',
-                minWidth: '180px',
+                minWidth: '220px',
                 margin: '8px 0',
               }}
             >
-              <Typography className="top-left-text" sx={{ color: 'text.primary', fontSize: '16px' }}>
-                Nodo inicial:{" "}
-                {nodoInicial === "" ? "Sin seleccionar" : nodoInicial}
+              <Typography sx={{ fontSize: '16px', fontWeight: 500 }}>
+                Nodo inicial: {nodoInicial || "Sin seleccionar"}
               </Typography>
-              <Typography className="top-left-text" sx={{ color: 'text.primary', fontSize: '16px' }}>
-                Nodo final: {nodoFinal === "" ? "Sin seleccionar" : nodoFinal}
+              <Typography sx={{ fontSize: '16px', fontWeight: 500 }}>
+                Nodo final: {nodoFinal || "Sin seleccionar"}
               </Typography>
+
+              <Stack spacing={1} mt={2}>
+                <Button variant="contained" size="small" onClick={() => setModoSeleccion("inicio")}>
+                  Seleccionar nodo inicial
+                </Button>
+                <Button variant="contained" size="small" onClick={() => setModoSeleccion("final")}>
+                  Seleccionar nodo final
+                </Button>
+                <Button variant="outlined" size="small" color="error" onClick={() => {
+                  setNodoInicial("");
+                  setNodoFinal("");
+                }}>
+                  Limpiar selección
+                </Button>
+              </Stack>
+
+              {modoSeleccion && (
+                <Typography sx={{ fontSize: '14px', mt: 2 }}>
+                  Haz clic en un nodo para asignar como <strong>{modoSeleccion}</strong>
+                </Typography>
+              )}
             </Box>
           </Panel>
+
           <Panel position="top-center">
             <Box
               sx={{
@@ -543,7 +562,7 @@ function Flow() {
                   }
                 },
                 '& .minimized ul, & .minimized h4, & .minimized br': {
-                    display: 'none',
+                  display: 'none',
                 }
               }}
               title="Haz clic para expandir o reducir"
@@ -567,7 +586,7 @@ function Flow() {
                 <b>Atajos útiles:</b>
                 <ul style={{ margin: 0, paddingLeft: 18 }}>
                   <li><b>Ctrl+Z</b>: Deshacer</li>
-                  <li><b>Ctrl+Y</b>: Rehacer</li> {/* <-- Añadido atajo Ctrl+Y */} 
+                  <li><b>Ctrl+Y</b>: Rehacer</li> {/* <-- Añadido atajo Ctrl+Y */}
                   <li><b>Ctrl+C</b>: Copiar nodo(s) seleccionado(s)</li>
                   <li><b>Ctrl+V</b>: Pegar nodo(s)</li>
                   <li><b>Ctrl+X</b>: Cortar nodo(s)</li>
@@ -576,12 +595,6 @@ function Flow() {
               </div>
             </Box>
           </Panel>
-<<<<<<< Updated upstream
-          <Panel
-            position="bottom-center" /* Panel para mostrar opciones de algoritmos */
-          >
-            <>Usen este panel para elegir algoritmos</>
-=======
           <Panel position='bottom-center' /* Panel para mostrar opciones de algoritmos */>
             <Box
               sx={{
@@ -638,7 +651,6 @@ function Flow() {
                 </Button>
               </Stack>
             </Box>
->>>>>>> Stashed changes
           </Panel>
         </ReactFlow>
       </div>
