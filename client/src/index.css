@@ -57,62 +57,120 @@ body:not([data-theme='dark']) {
 }
 
 .node-circle {
-  width: 50px;              
-  height: 50px;
+  width: 60px;
+  height: 60px;
   border: 1px solid var(--node-border);
-  border-radius: 50%;       
+  border-radius: 50%;
   background: var(--node-bg);
-  display: flex;            
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
+  position: relative;
   box-sizing: border-box;
-  padding: 0;               
+  padding: 4px;
 }
 
 .node-circle label {
-  display: block;
   font-size: 12px;
   text-align: center;
   line-height: 1.1;
+  cursor: pointer;
 }
+
+.node-coords-circle {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: #888;
+  pointer-events: none;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+.editable-input {
+  width: 90%;
+  padding: 4px;
+  font-size: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+}
+
 .node-ellipse {
-  width: 80px;               
+  width: 80px;
   height: 50px;
   border: 1px solid var(--node-border);
-  border-radius: 50%;        
+  border-radius: 50%;
   background: var(--node-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  position: relative;
   box-sizing: border-box;
-  padding: 0;
+  padding: 4px;
 }
 
 .node-ellipse label {
-  display: block;
   font-size: 12px;
   text-align: center;
   line-height: 1.1;
+  cursor: pointer;
+}
+
+.node-coords-ellipse {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: #888;
+  pointer-events: none;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+.editable-input {
+  width: 90%;
+  padding: 4px;
+  font-size: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
 }
 .node-rombo {
   width: 60px;
   height: 60px;
   border: 1px solid var(--node-border);
   background: var(--node-bg);
-  transform: rotate(45deg); /* Hace que se vea como rombo */
+  transform: rotate(45deg);
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  position: relative; /* Necesario para posicionar coords */
   box-sizing: border-box;
 }
 
-/* Contenido rotado de regreso para que se lea normal */
 .rhombus-content {
   transform: rotate(-45deg);
-  text-align: center;
-  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.node-coords-rombo {
+  position: absolute;
+  top: 100%;
+  left: 115%;
+  transform: translateX(-50%) rotate(-45deg); /* ← esto corrige la inclinación */
+  font-size: 9px;
+  color: #888;
+  white-space: nowrap;
   pointer-events: none;
+  margin-top: 2px;
 }
