@@ -435,7 +435,7 @@ function Flow() {
                 value={selectedType}
                 setValue={setSelectedType}
                 options={nodeTypesArray}
-                minWidth={200}
+                minWidth={180}
               />
               <Stack direction="row" spacing={2} alignItems="center">
                 <Button
@@ -606,7 +606,7 @@ function Flow() {
                 backdropFilter: 'blur(8px)',
                 borderRadius: '12px',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
-                padding: '24px 32px',
+                padding: '8px 32px',
                 margin: '0 auto',
                 minWidth: 400,
                 maxWidth: '90vw',
