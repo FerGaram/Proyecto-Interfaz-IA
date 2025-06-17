@@ -324,6 +324,42 @@ function Flow() {
     },
   });
 
+  // Derivar nodos y aristas resaltados para evitar ciclos infinitos
+  const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
+  const highlightedEdges = edges.map(edge => {
+    const isConnectedToSelected = selectedNodeIds.includes(edge.source) || selectedNodeIds.includes(edge.target);
+    return {
+      ...edge,
+      style: {
+        ...(edge.style || {}),
+        stroke: isConnectedToSelected ? theme.palette.primary.main : theme.palette.divider,
+        strokeWidth: isConnectedToSelected ? 2.5 : 1.5,
+        transition: 'stroke 0.2s, stroke-width 0.2s',
+      },
+      selected: isConnectedToSelected,
+    };
+  });
+  const highlightedNodes = nodes.map(node => {
+    if (node.selected) {
+      return {
+        ...node,
+        style: {
+          ...(node.style || {}),
+          boxShadow: `0 0 0 4px ${theme.palette.primary.main}22, 0 2px 12px 0 ${theme.palette.primary.main}11`,
+          zIndex: 10,
+          transition: 'box-shadow 0.25s',
+        },
+      };
+    } else {
+      // Elimina el boxShadow si no está seleccionado
+      const { boxShadow, zIndex, transition, ...restStyle } = node.style || {};
+      return {
+        ...node,
+        style: restStyle,
+      };
+    }
+  });
+
   // Devuelve la pantalla principal de React Flow
   return (
     <ThemeProvider theme={theme}>
@@ -339,10 +375,10 @@ function Flow() {
           onDuplicate={handleDuplicate}
         />
         <ReactFlow
-          nodes={nodes} // Nodos iniciales
-          onNodesChange={onNodesChange} // Handler de cambios de nodos
-          nodeTypes={nodeTypes} // Tipos de nodos personalizados
-          edges={edges} // Aristas iniciales
+          nodes={highlightedNodes} // Nodos resaltados
+          onNodesChange={onNodesChange}
+          nodeTypes={nodeTypes}
+          edges={highlightedEdges} // Aristas resaltadas
           onEdgesChange={onEdgesChange} // Handler de cambios de aristas
           onConnect={onConnect} // Handler de conexiones
           onNodeClick={(_, node) => {
