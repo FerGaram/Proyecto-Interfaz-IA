@@ -21,18 +21,18 @@ import { NodeTest } from "./components/nodes/NodeTest";
 import { NodeCircle } from "./components/nodes/NodeCircle";
 import { NodeEllipse } from "./components/nodes/NodeEllipse";
 import { NodeRombo } from "./components/nodes/NodeRombo";
-import { RobotNode } from "./components/nodes/RobotNode"
+import { RobotNode } from "./components/nodes/RobotNode";
 import { KeyboardShortcuts } from "./components/KeyboardShortcuts";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography'; // Import Typography
-import { NodeTypeDropdown } from './components/NodeTypeDropdown';
-import { useRobotMovement } from './components/useRobotMovement';
-import { convertirAGrafoJSON } from './controllers/toFromJson'
-import { CloudDropdown } from './components/CloudDropdown';
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography"; // Import Typography
+import { NodeTypeDropdown } from "./components/NodeTypeDropdown";
+import { useRobotMovement } from "./components/useRobotMovement";
+import { convertirAGrafoJSON } from "./controllers/toFromJson";
+import { CloudDropdown } from "./components/CloudDropdown";
 
 // Aquí se deben importar los nodos personalizados que se hayan hecho
 const nodeTypes = {
@@ -93,25 +93,52 @@ const nodeTypesArray = [
 
 // Componente personalizado para MiniMap con tipado correcto
 function MiniMapNodeCustom(props: MiniMapNodeProps) {
-  const { x, y, width, height, style = {}, selected, strokeColor, strokeWidth: sw, color, borderRadius, className } = props;
-  const stroke = selected ? '#ff3333' : (strokeColor || '#222');
-  const strokeWidth = selected ? 6 : (sw || 2);
-  const fill = color || style.background || '#fff';
+  const {
+    x,
+    y,
+    width,
+    height,
+    style = {},
+    selected,
+    strokeColor,
+    strokeWidth: sw,
+    color,
+    borderRadius,
+    className,
+  } = props;
+  const stroke = selected ? "#ff3333" : strokeColor || "#222";
+  const strokeWidth = selected ? 6 : sw || 2;
+  const fill = color || style.background || "#fff";
 
   // Detecta tipo por className (React Flow pone el tipo de nodo en la clase)
-  const typeClass = (className || '').toLowerCase();
-  if (typeClass.includes('circle')) {
+  const typeClass = (className || "").toLowerCase();
+  if (typeClass.includes("circle")) {
     const r = Math.min(Number(width), Number(height)) / 2 - strokeWidth;
     return (
-      <circle cx={String(Number(x) + Number(width) / 2)} cy={String(Number(y) + Number(height) / 2)} r={String(r)} fill={String(fill)} stroke={String(stroke)} strokeWidth={String(strokeWidth)} />
+      <circle
+        cx={String(Number(x) + Number(width) / 2)}
+        cy={String(Number(y) + Number(height) / 2)}
+        r={String(r)}
+        fill={String(fill)}
+        stroke={String(stroke)}
+        strokeWidth={String(strokeWidth)}
+      />
     );
   }
-  if (typeClass.includes('ellipse')) {
+  if (typeClass.includes("ellipse")) {
     return (
-      <ellipse cx={String(Number(x) + Number(width) / 2)} cy={String(Number(y) + Number(height) / 2)} rx={String((Number(width) / 2) - strokeWidth)} ry={String((Number(height) / 2) - strokeWidth)} fill={String(fill)} stroke={String(stroke)} strokeWidth={String(strokeWidth)} />
+      <ellipse
+        cx={String(Number(x) + Number(width) / 2)}
+        cy={String(Number(y) + Number(height) / 2)}
+        rx={String(Number(width) / 2 - strokeWidth)}
+        ry={String(Number(height) / 2 - strokeWidth)}
+        fill={String(fill)}
+        stroke={String(stroke)}
+        strokeWidth={String(strokeWidth)}
+      />
     );
   }
-  if (typeClass.includes('rombo')) {
+  if (typeClass.includes("rombo")) {
     const cx = Number(x) + Number(width) / 2;
     const cy = Number(y) + Number(height) / 2;
     const w = Number(width) / 2 - strokeWidth;
@@ -121,14 +148,30 @@ function MiniMapNodeCustom(props: MiniMapNodeProps) {
       [cx + w, cy],
       [cx, cy + h],
       [cx - w, cy],
-    ].map(p => p.join(",")).join(" ");
+    ]
+      .map((p) => p.join(","))
+      .join(" ");
     return (
-      <polygon points={String(points)} fill={String(fill)} stroke={String(stroke)} strokeWidth={String(strokeWidth)} />
+      <polygon
+        points={String(points)}
+        fill={String(fill)}
+        stroke={String(stroke)}
+        strokeWidth={String(strokeWidth)}
+      />
     );
   }
   // Rectángulo por defecto
   return (
-    <rect x={String(Number(x) + strokeWidth / 2)} y={String(Number(y) + strokeWidth / 2)} width={String(Number(width) - strokeWidth)} height={String(Number(height) - strokeWidth)} rx={String(borderRadius)} fill={String(fill)} stroke={String(stroke)} strokeWidth={String(strokeWidth)} />
+    <rect
+      x={String(Number(x) + strokeWidth / 2)}
+      y={String(Number(y) + strokeWidth / 2)}
+      width={String(Number(width) - strokeWidth)}
+      height={String(Number(height) - strokeWidth)}
+      rx={String(borderRadius)}
+      fill={String(fill)}
+      stroke={String(stroke)}
+      strokeWidth={String(strokeWidth)}
+    />
   );
 }
 
@@ -155,20 +198,24 @@ function Flow() {
   const [nodoInicial, setNodoInicial] = useState("");
   const [nodoFinal, setNodoFinal] = useState("");
 
-  const { highlightedEdges: solutionEdges, setSolutionPathAndHighlight, clearSolutionPath } = useRobotMovement();
+  const {
+    highlightedEdges: solutionEdges,
+    setSolutionPathAndHighlight,
+    clearSolutionPath,
+  } = useRobotMovement();
 
   // Función para actualizar el solutionPath en el nodo robot
   const updateRobotSolutionPath = useCallback((solutionPath: string[]) => {
     setCurrentSolutionPath(solutionPath);
     setNodes((prevNodes) =>
       prevNodes.map((node) => {
-        if (node.type === 'nodeRobot') {
+        if (node.type === "nodeRobot") {
           return {
             ...node,
             data: {
               ...node.data,
-              solutionPath: solutionPath
-            }
+              solutionPath: solutionPath,
+            },
           };
         }
         return node;
@@ -238,6 +285,35 @@ function Flow() {
   }, []);
 
   const ejecutarAlgoritmo = async () => {
+    // Verificar si hay nodos en la pantalla
+    if (nodes.length === 0) {
+      alert(
+        "No hay nodos en la pantalla. Agrega algunos nodos antes de ejecutar el algoritmo."
+      );
+      return;
+    }
+
+    // Verificar si existe un nodo robot
+    const robotNode = nodes.find((node) => node.type === "nodeRobot");
+
+    // Si no existe el nodo robot, agregarlo automáticamente
+    if (!robotNode) {
+      const newRobotId = (ultimoId.current + 1).toString();
+      ultimoId.current++;
+
+      const newRobotNode = {
+        id: newRobotId,
+        position: { x: 400, y: 200 },
+        data: { label: "Robot" },
+        type: "nodeRobot" as const,
+      };
+
+      setNodes((prevNodes) => [...prevNodes, newRobotNode]);
+
+      // Pequeña pausa para asegurar que el nodo se agregue antes de continuar
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
     const data = convertirAGrafoJSON(
       nodes,
       edges,
@@ -268,9 +344,11 @@ function Flow() {
 
         // Actualizar el camino en el nodo robot
         updateRobotSolutionPath(resultado.camino);
-        
+
         alert(
-          `Camino encontrado: ${resultado.camino.join(" → ")}\nCosto: ${resultado.costo}\n\n¡Haz clic en el robot para que siga el camino!`
+          `Camino encontrado: ${resultado.camino.join(" → ")}\nCosto: ${
+            resultado.costo
+          }\n\n¡Haz clic en el robot para que siga el camino!`
         );
       } else {
         alert("Error: " + resultado.detail);
@@ -379,16 +457,18 @@ function Flow() {
   });
 
   // Derivar nodos y aristas resaltados para evitar ciclos infinitos
-  const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
-  const styledEdges = edges.map(edge => {
-    const isConnectedToSelected = selectedNodeIds.includes(edge.source) || selectedNodeIds.includes(edge.target);
+  const selectedNodeIds = nodes.filter((n) => n.selected).map((n) => n.id);
+  const styledEdges = edges.map((edge) => {
+    const isConnectedToSelected =
+      selectedNodeIds.includes(edge.source) ||
+      selectedNodeIds.includes(edge.target);
     const isSolutionEdge = solutionEdges.has(edge.id); // Esta viene del hook
 
     let strokeColor = theme.palette.divider;
     let strokeWidth = 1.5;
 
     if (isSolutionEdge) {
-      strokeColor = '#4CAF50'; // Verde para el camino de solución
+      strokeColor = "#4CAF50"; // Verde para el camino de solución
       strokeWidth = 3;
     } else if (isConnectedToSelected) {
       strokeColor = theme.palette.primary.main;
@@ -401,12 +481,12 @@ function Flow() {
         ...(edge.style || {}),
         stroke: strokeColor,
         strokeWidth: strokeWidth,
-        transition: 'stroke 0.2s, stroke-width 0.2s',
+        transition: "stroke 0.2s, stroke-width 0.2s",
       },
       selected: isConnectedToSelected || isSolutionEdge,
     };
   });
-  const highlightedNodes = nodes.map(node => {
+  const highlightedNodes = nodes.map((node) => {
     if (node.selected) {
       return {
         ...node,
@@ -414,7 +494,7 @@ function Flow() {
           ...(node.style || {}),
           boxShadow: `0 0 0 4px ${theme.palette.primary.main}22, 0 2px 12px 0 ${theme.palette.primary.main}11`,
           zIndex: 10,
-          transition: 'box-shadow 0.25s',
+          transition: "box-shadow 0.25s",
         },
       };
     } else {
@@ -467,7 +547,9 @@ function Flow() {
             nodeStrokeColor={undefined}
             nodeColor={undefined}
             nodeStrokeWidth={undefined}
-            maskColor={darkMode ? 'rgba(30,30,40,0.25)' : 'rgba(220,220,230,0.15)'}
+            maskColor={
+              darkMode ? "rgba(30,30,40,0.25)" : "rgba(220,220,230,0.15)"
+            }
             nodeComponent={MiniMapNodeCustom}
           />
           <Panel position="top-left">
@@ -747,38 +829,55 @@ function Flow() {
               </div>
             </Box>
           </Panel>
-          <Panel position='bottom-center' /* Panel para mostrar opciones de algoritmos */>
+          <Panel
+            position="bottom-center" /* Panel para mostrar opciones de algoritmos */
+          >
             <Box
               sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                bgcolor: darkMode ? 'rgba(30,30,40,0.55)' : 'rgba(220,220,230,0.75)',
-                backdropFilter: 'blur(8px)',
-                borderRadius: '12px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
-                padding: '8px 32px',
-                margin: '0 auto',
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: darkMode
+                  ? "rgba(30,30,40,0.55)"
+                  : "rgba(220,220,230,0.75)",
+                backdropFilter: "blur(8px)",
+                borderRadius: "12px",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.10)",
+                padding: "8px 32px",
+                margin: "0 auto",
                 minWidth: 400,
-                maxWidth: '90vw',
+                maxWidth: "90vw",
               }}
             >
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'text.primary', letterSpacing: 1 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  mb: 2,
+                  fontWeight: 600,
+                  color: "text.primary",
+                  letterSpacing: 1,
+                }}
+              >
                 Seleccionar Algoritmo
               </Typography>
-              <Stack direction="row" spacing={2} alignItems="center" sx={{ width: '100%', justifyContent: 'center', mb: 2 }}>
+              <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                sx={{ width: "100%", justifyContent: "center", mb: 2 }}
+              >
                 <CloudDropdown
                   label="Algoritmo"
                   value={algoritmo}
                   setValue={setAlgoritmo}
                   options={[
-                    { value: 'BFS', label: 'BFS (Amplitud)' },
-                    { value: 'DFS', label: 'DFS (Profundidad)' },
-                    { value: 'IDDFS', label: 'IDDFS' },
-                    { value: 'Costo Uniforme', label: 'Costo Uniforme' },
-                    { value: 'Ávara', label: 'Ávara' },
-                    { value: 'A*', label: 'A*' },
+                    { value: "BFS", label: "BFS (Amplitud)" },
+                    { value: "DFS", label: "DFS (Profundidad)" },
+                    { value: "IDDFS", label: "IDDFS" },
+                    { value: "Costo Uniforme", label: "Costo Uniforme" },
+                    { value: "Ávara", label: "Ávara" },
+                    { value: "A*", label: "A*" },
                   ]}
                   minWidth={200}
                 />
@@ -787,14 +886,18 @@ function Flow() {
                   sx={{
                     minWidth: 180,
                     fontWeight: 600,
-                    fontSize: '1rem',
-                    borderRadius: '8px',
-                    boxShadow: 'none',
-                    bgcolor: darkMode ? 'rgba(40,60,90,0.85)' : 'background.paper',
-                    color: darkMode ? 'primary.main' : 'primary.dark',
-                    border: '1.5px solid',
-                    borderColor: 'primary.main',
-                    '&:hover': { bgcolor: darkMode ? 'rgba(40,60,120,0.95)' : 'grey.100' }
+                    fontSize: "1rem",
+                    borderRadius: "8px",
+                    boxShadow: "none",
+                    bgcolor: darkMode
+                      ? "rgba(40,60,90,0.85)"
+                      : "background.paper",
+                    color: darkMode ? "primary.main" : "primary.dark",
+                    border: "1.5px solid",
+                    borderColor: "primary.main",
+                    "&:hover": {
+                      bgcolor: darkMode ? "rgba(40,60,120,0.95)" : "grey.100",
+                    },
                   }}
                   onClick={ejecutarAlgoritmo}
                   className="boton-ejecutar"
@@ -806,20 +909,24 @@ function Flow() {
                   sx={{
                     minWidth: 180,
                     fontWeight: 600,
-                    fontSize: '1rem',
-                    borderRadius: '8px',
-                    boxShadow: 'none',
-                    bgcolor: darkMode ? 'rgba(40,60,90,0.85)' : 'background.paper',
-                    color: darkMode ? 'warning.main' : 'warning.dark',
-                    border: '1.5px solid',
-                    borderColor: 'warning.main',
-                    '&:hover': { bgcolor: darkMode ? 'rgba(60,40,90,0.95)' : 'grey.100' }
+                    fontSize: "1rem",
+                    borderRadius: "8px",
+                    boxShadow: "none",
+                    bgcolor: darkMode
+                      ? "rgba(40,60,90,0.85)"
+                      : "background.paper",
+                    color: darkMode ? "warning.main" : "warning.dark",
+                    border: "1.5px solid",
+                    borderColor: "warning.main",
+                    "&:hover": {
+                      bgcolor: darkMode ? "rgba(60,40,90,0.95)" : "grey.100",
+                    },
                   }}
                   onClick={() => {
                     clearSolutionPath();
                     // Actualizar el camino en el nodo robot
                     updateRobotSolutionPath([]);
-                    alert('Camino de solución limpiado');
+                    alert("Camino de solución limpiado");
                   }}
                 >
                   Limpiar Camino
