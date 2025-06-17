@@ -232,3 +232,25 @@
   color: #222 !important;
   border-bottom: 1px solid #eee !important;
 }
+
+/* Animación para aristas de solución */
+.react-flow__edge.solution-path {
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% { stroke-opacity: 0.8; }
+    50% { stroke-opacity: 1; }
+    100% { stroke-opacity: 0.8; }
+}
+
+/* Estilo para el robot celebrando */
+.robot-container.celebrating {
+    animation: celebrate 0.6s ease-in-out;
+}
+
+@keyframes celebrate {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.1) rotate(-5deg); }
+    75% { transform: scale(1.1) rotate(5deg); }
+}

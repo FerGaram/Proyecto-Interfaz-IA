@@ -21,6 +21,7 @@ import { NodeTest } from "./components/nodes/NodeTest";
 import { NodeCircle } from "./components/nodes/NodeCircle";
 import { NodeEllipse } from "./components/nodes/NodeEllipse";
 import { NodeRombo } from "./components/nodes/NodeRombo";
+import { RobotNode } from "./components/nodes/RobotNode"
 import { KeyboardShortcuts } from "./components/KeyboardShortcuts";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
@@ -29,6 +30,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography'; // Import Typography
 import { NodeTypeDropdown } from './components/NodeTypeDropdown';
+import { useRobotMovement } from './components/useRobotMovement';
 import { convertirAGrafoJSON } from './controllers/toFromJson'
 import { CloudDropdown } from './components/CloudDropdown';
 
@@ -38,6 +40,7 @@ const nodeTypes = {
   nodeCircle: NodeCircle,
   nodeEllipse: NodeEllipse,
   nodeRombo: NodeRombo,
+  nodeRobot: RobotNode,
 };
 
 // Lista de nodos iniciales de prueba, se podrían borrar más adelante
@@ -59,6 +62,12 @@ const nodosIniciales: Array<defaultNodeModel> = [
     position: { x: 200, y: 100 },
     data: { label: "3" },
     type: "nodeRombo",
+  },
+  {
+    id: "0",
+    position: { x: 400, y: 200 },
+    data: { label: "Robot" },
+    type: "nodeRobot",
   },
 ];
 
@@ -119,7 +128,7 @@ function MiniMapNodeCustom(props: MiniMapNodeProps) {
   }
   // Rectángulo por defecto
   return (
-    <rect x={String(Number(x) + strokeWidth/2)} y={String(Number(y) + strokeWidth/2)} width={String(Number(width) - strokeWidth)} height={String(Number(height) - strokeWidth)} rx={String(borderRadius)} fill={String(fill)} stroke={String(stroke)} strokeWidth={String(strokeWidth)} />
+    <rect x={String(Number(x) + strokeWidth / 2)} y={String(Number(y) + strokeWidth / 2)} width={String(Number(width) - strokeWidth)} height={String(Number(height) - strokeWidth)} rx={String(borderRadius)} fill={String(fill)} stroke={String(stroke)} strokeWidth={String(strokeWidth)} />
   );
 }
 
@@ -129,6 +138,7 @@ function Flow() {
   const [nodes, setNodes] = useState(nodosIniciales);
   const [edges, setEdges] = useState(aristasIniciales);
   const [minimized, setMinimized] = useState(false); //se agrega para ocuptar postit
+  const [currentSolutionPath, setCurrentSolutionPath] = useState<string[]>([]);
 
   const [algoritmo, setAlgoritmo] = useState("BFS");
   const [modoSeleccion, setModoSeleccion] = useState<"inicio" | "final" | null>(
@@ -144,6 +154,27 @@ function Flow() {
   // Hooks para almacenar los nodos iniciales y finales
   const [nodoInicial, setNodoInicial] = useState("");
   const [nodoFinal, setNodoFinal] = useState("");
+
+  const { highlightedEdges: solutionEdges, setSolutionPathAndHighlight, clearSolutionPath } = useRobotMovement();
+
+  // Función para actualizar el solutionPath en el nodo robot
+  const updateRobotSolutionPath = useCallback((solutionPath: string[]) => {
+    setCurrentSolutionPath(solutionPath);
+    setNodes((prevNodes) =>
+      prevNodes.map((node) => {
+        if (node.type === 'nodeRobot') {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              solutionPath: solutionPath
+            }
+          };
+        }
+        return node;
+      })
+    );
+  }, []);
 
   // Handler para añadir/modificar/eliminar nodos, no hace falta modificar
   const onNodesChange = useCallback(
@@ -220,26 +251,26 @@ function Flow() {
       return;
     }
 
-    const cuerpo = convertirAGrafoJSON(
-      nodes,
-      edges,
-      nodoInicial,
-      nodoFinal,
-      algoritmo
-    );
-    console.log("Datos enviados al servidor:", cuerpo);
+    console.log("Datos enviados al servidor:", data);
     try {
       const resp = await fetch("http://localhost:8000/buscar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(cuerpo),
+        body: JSON.stringify(data),
       });
       const resultado = await resp.json();
 
       if (resp.ok) {
         console.log("Camino:", resultado.camino);
+
+        // Establecer el camino de solución y destacar aristas
+        setSolutionPathAndHighlight(resultado.camino);
+
+        // Actualizar el camino en el nodo robot
+        updateRobotSolutionPath(resultado.camino);
+        
         alert(
-          `Camino: ${resultado.camino.join(" → ")}\nCosto: ${resultado.costo}`
+          `Camino encontrado: ${resultado.camino.join(" → ")}\nCosto: ${resultado.costo}\n\n¡Haz clic en el robot para que siga el camino!`
         );
       } else {
         alert("Error: " + resultado.detail);
@@ -349,17 +380,30 @@ function Flow() {
 
   // Derivar nodos y aristas resaltados para evitar ciclos infinitos
   const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
-  const highlightedEdges = edges.map(edge => {
+  const styledEdges = edges.map(edge => {
     const isConnectedToSelected = selectedNodeIds.includes(edge.source) || selectedNodeIds.includes(edge.target);
+    const isSolutionEdge = solutionEdges.has(edge.id); // Esta viene del hook
+
+    let strokeColor = theme.palette.divider;
+    let strokeWidth = 1.5;
+
+    if (isSolutionEdge) {
+      strokeColor = '#4CAF50'; // Verde para el camino de solución
+      strokeWidth = 3;
+    } else if (isConnectedToSelected) {
+      strokeColor = theme.palette.primary.main;
+      strokeWidth = 2.5;
+    }
+
     return {
       ...edge,
       style: {
         ...(edge.style || {}),
-        stroke: isConnectedToSelected ? theme.palette.primary.main : theme.palette.divider,
-        strokeWidth: isConnectedToSelected ? 2.5 : 1.5,
+        stroke: strokeColor,
+        strokeWidth: strokeWidth,
         transition: 'stroke 0.2s, stroke-width 0.2s',
       },
-      selected: isConnectedToSelected,
+      selected: isConnectedToSelected || isSolutionEdge,
     };
   });
   const highlightedNodes = nodes.map(node => {
@@ -401,7 +445,7 @@ function Flow() {
           nodes={highlightedNodes} // Nodos resaltados
           onNodesChange={onNodesChange}
           nodeTypes={nodeTypes}
-          edges={highlightedEdges} // Aristas resaltadas
+          edges={styledEdges} // Aristas con estilo
           onEdgesChange={onEdgesChange} // Handler de cambios de aristas
           onConnect={onConnect} // Handler de conexiones
           onNodeClick={(_, node) => {
@@ -419,7 +463,7 @@ function Flow() {
         >
           <Background /* Fondo punteado */ />
           <Controls /* Botones de la esquina inferior izquierda */ />
-          <MiniMap 
+          <MiniMap
             nodeStrokeColor={undefined}
             nodeColor={undefined}
             nodeStrokeWidth={undefined}
@@ -756,6 +800,29 @@ function Flow() {
                   className="boton-ejecutar"
                 >
                   Ejecutar algoritmo
+                </Button>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    minWidth: 180,
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    borderRadius: '8px',
+                    boxShadow: 'none',
+                    bgcolor: darkMode ? 'rgba(40,60,90,0.85)' : 'background.paper',
+                    color: darkMode ? 'warning.main' : 'warning.dark',
+                    border: '1.5px solid',
+                    borderColor: 'warning.main',
+                    '&:hover': { bgcolor: darkMode ? 'rgba(60,40,90,0.95)' : 'grey.100' }
+                  }}
+                  onClick={() => {
+                    clearSolutionPath();
+                    // Actualizar el camino en el nodo robot
+                    updateRobotSolutionPath([]);
+                    alert('Camino de solución limpiado');
+                  }}
+                >
+                  Limpiar Camino
                 </Button>
               </Stack>
             </Box>
