@@ -11,6 +11,7 @@ import {
   MiniMap,
   ConnectionMode,
   Panel,
+  type MiniMapNodeProps,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import "./App.css";
@@ -25,10 +26,11 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography"; // Import Typography
-import { NodeTypeDropdown } from "./components/NodeTypeDropdown";
-import { convertirAGrafoJSON } from "./controllers/toFromJson";
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography'; // Import Typography
+import { NodeTypeDropdown } from './components/NodeTypeDropdown';
+import { convertirAGrafoJSON } from './controllers/toFromJson'
+import { CloudDropdown } from './components/CloudDropdown';
 
 // Aquí se deben importar los nodos personalizados que se hayan hecho
 const nodeTypes = {
@@ -73,12 +75,53 @@ const aristasIniciales: Array<defaultEdgeModel> = [
 ];
 
 const nodeTypesArray = [
-  { label: "Rectáng.", value: "nodeTest" },
+  { label: "Rectángulo", value: "nodeTest" },
   { label: "Círculo", value: "nodeCircle" },
   { label: "Elipse", value: "nodeEllipse" },
   { label: "Rombo", value: "nodeRombo" },
   // Agrega aquí tus tipos personalizados
 ];
+
+// Componente personalizado para MiniMap con tipado correcto
+function MiniMapNodeCustom(props: MiniMapNodeProps) {
+  const { x, y, width, height, style = {}, selected, strokeColor, strokeWidth: sw, color, borderRadius, className } = props;
+  const stroke = selected ? '#ff3333' : (strokeColor || '#222');
+  const strokeWidth = selected ? 6 : (sw || 2);
+  const fill = color || style.background || '#fff';
+
+  // Detecta tipo por className (React Flow pone el tipo de nodo en la clase)
+  const typeClass = (className || '').toLowerCase();
+  if (typeClass.includes('circle')) {
+    const r = Math.min(Number(width), Number(height)) / 2 - strokeWidth;
+    return (
+      <circle cx={String(Number(x) + Number(width) / 2)} cy={String(Number(y) + Number(height) / 2)} r={String(r)} fill={String(fill)} stroke={String(stroke)} strokeWidth={String(strokeWidth)} />
+    );
+  }
+  if (typeClass.includes('ellipse')) {
+    return (
+      <ellipse cx={String(Number(x) + Number(width) / 2)} cy={String(Number(y) + Number(height) / 2)} rx={String((Number(width) / 2) - strokeWidth)} ry={String((Number(height) / 2) - strokeWidth)} fill={String(fill)} stroke={String(stroke)} strokeWidth={String(strokeWidth)} />
+    );
+  }
+  if (typeClass.includes('rombo')) {
+    const cx = Number(x) + Number(width) / 2;
+    const cy = Number(y) + Number(height) / 2;
+    const w = Number(width) / 2 - strokeWidth;
+    const h = Number(height) / 2 - strokeWidth;
+    const points = [
+      [cx, cy - h],
+      [cx + w, cy],
+      [cx, cy + h],
+      [cx - w, cy],
+    ].map(p => p.join(",")).join(" ");
+    return (
+      <polygon points={String(points)} fill={String(fill)} stroke={String(stroke)} strokeWidth={String(strokeWidth)} />
+    );
+  }
+  // Rectángulo por defecto
+  return (
+    <rect x={String(Number(x) + strokeWidth/2)} y={String(Number(y) + strokeWidth/2)} width={String(Number(width) - strokeWidth)} height={String(Number(height) - strokeWidth)} rx={String(borderRadius)} fill={String(fill)} stroke={String(stroke)} strokeWidth={String(strokeWidth)} />
+  );
+}
 
 // Función principal
 function Flow() {
@@ -304,6 +347,42 @@ function Flow() {
     },
   });
 
+  // Derivar nodos y aristas resaltados para evitar ciclos infinitos
+  const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
+  const highlightedEdges = edges.map(edge => {
+    const isConnectedToSelected = selectedNodeIds.includes(edge.source) || selectedNodeIds.includes(edge.target);
+    return {
+      ...edge,
+      style: {
+        ...(edge.style || {}),
+        stroke: isConnectedToSelected ? theme.palette.primary.main : theme.palette.divider,
+        strokeWidth: isConnectedToSelected ? 2.5 : 1.5,
+        transition: 'stroke 0.2s, stroke-width 0.2s',
+      },
+      selected: isConnectedToSelected,
+    };
+  });
+  const highlightedNodes = nodes.map(node => {
+    if (node.selected) {
+      return {
+        ...node,
+        style: {
+          ...(node.style || {}),
+          boxShadow: `0 0 0 4px ${theme.palette.primary.main}22, 0 2px 12px 0 ${theme.palette.primary.main}11`,
+          zIndex: 10,
+          transition: 'box-shadow 0.25s',
+        },
+      };
+    } else {
+      // Elimina el boxShadow si no está seleccionado
+      const { boxShadow, zIndex, transition, ...restStyle } = node.style || {};
+      return {
+        ...node,
+        style: restStyle,
+      };
+    }
+  });
+
   // Devuelve la pantalla principal de React Flow
   return (
     <ThemeProvider theme={theme}>
@@ -319,13 +398,13 @@ function Flow() {
           onDuplicate={handleDuplicate}
         />
         <ReactFlow
-          nodes={nodes} // Nodos iniciales
-          onNodesChange={onNodesChange} // Handler de cambios de nodos
-          nodeTypes={nodeTypes} // Tipos de nodos personalizados
-          edges={edges} // Aristas iniciales
+          nodes={highlightedNodes} // Nodos resaltados
+          onNodesChange={onNodesChange}
+          nodeTypes={nodeTypes}
+          edges={highlightedEdges} // Aristas resaltadas
           onEdgesChange={onEdgesChange} // Handler de cambios de aristas
           onConnect={onConnect} // Handler de conexiones
-          onNodeClick={(event, node) => {
+          onNodeClick={(_, node) => {
             if (modoSeleccion === "inicio") {
               setNodoInicial(node.id);
               setModoSeleccion(null); // desactiva modo
@@ -340,7 +419,13 @@ function Flow() {
         >
           <Background /* Fondo punteado */ />
           <Controls /* Botones de la esquina inferior izquierda */ />
-          <MiniMap /* Minimapa de la esquina inferior derecha */ />
+          <MiniMap 
+            nodeStrokeColor={undefined}
+            nodeColor={undefined}
+            nodeStrokeWidth={undefined}
+            maskColor={darkMode ? 'rgba(30,30,40,0.25)' : 'rgba(220,220,230,0.15)'}
+            nodeComponent={MiniMapNodeCustom}
+          />
           <Panel position="top-left">
             <Box
               className="panel-box"
@@ -418,10 +503,12 @@ function Flow() {
                 maxWidth: "90vw",
               }}
             >
-              <NodeTypeDropdown
-                selectedType={selectedType}
-                setSelectedType={setSelectedType}
-                nodeTypesArray={nodeTypesArray}
+              <CloudDropdown
+                label="Tipo de nodo"
+                value={selectedType}
+                setValue={setSelectedType}
+                options={nodeTypesArray}
+                minWidth={180}
               />
               <Stack direction="row" spacing={2} alignItems="center">
                 <Button
@@ -617,21 +704,61 @@ function Flow() {
             </Box>
           </Panel>
           <Panel position='bottom-center' /* Panel para mostrar opciones de algoritmos */>
-            <div className="algoritmo-panel">
-              <h4>Seleccionar algoritmo</h4>
-              <select
-                value={algoritmo}
-                onChange={(e) => setAlgoritmo(e.target.value)}
-                className="selector-algoritmo">
-                <option value="BFS">BFS (Amplitud)</option>
-                <option value="DFS">DFS (Profundidad)</option>
-                <option value="IDDFS">IDDFS</option>
-                <option value="Costo Uniforme">Costo Uniforme</option>
-                <option value="Ávara">Ávara</option>
-                <option value="A*">A*</option>
-              </select><br />
-              <button onClick={ejecutarAlgoritmo} className="boton-ejecutar">Ejecutar algoritmo</button>
-            </div>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: darkMode ? 'rgba(30,30,40,0.55)' : 'rgba(220,220,230,0.75)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
+                padding: '8px 32px',
+                margin: '0 auto',
+                minWidth: 400,
+                maxWidth: '90vw',
+              }}
+            >
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'text.primary', letterSpacing: 1 }}>
+                Seleccionar Algoritmo
+              </Typography>
+              <Stack direction="row" spacing={2} alignItems="center" sx={{ width: '100%', justifyContent: 'center', mb: 2 }}>
+                <CloudDropdown
+                  label="Algoritmo"
+                  value={algoritmo}
+                  setValue={setAlgoritmo}
+                  options={[
+                    { value: 'BFS', label: 'BFS (Amplitud)' },
+                    { value: 'DFS', label: 'DFS (Profundidad)' },
+                    { value: 'IDDFS', label: 'IDDFS' },
+                    { value: 'Costo Uniforme', label: 'Costo Uniforme' },
+                    { value: 'Ávara', label: 'Ávara' },
+                    { value: 'A*', label: 'A*' },
+                  ]}
+                  minWidth={200}
+                />
+                <Button
+                  variant="contained"
+                  sx={{
+                    minWidth: 180,
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    borderRadius: '8px',
+                    boxShadow: 'none',
+                    bgcolor: darkMode ? 'rgba(40,60,90,0.85)' : 'background.paper',
+                    color: darkMode ? 'primary.main' : 'primary.dark',
+                    border: '1.5px solid',
+                    borderColor: 'primary.main',
+                    '&:hover': { bgcolor: darkMode ? 'rgba(40,60,120,0.95)' : 'grey.100' }
+                  }}
+                  onClick={ejecutarAlgoritmo}
+                  className="boton-ejecutar"
+                >
+                  Ejecutar algoritmo
+                </Button>
+              </Stack>
+            </Box>
           </Panel>
         </ReactFlow>
       </div>
