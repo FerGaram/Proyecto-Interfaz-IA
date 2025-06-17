@@ -5,13 +5,13 @@ import {
   useReactFlow,
   useNodeId,
   type BuiltInNode,
-  type NodeProps
+  type NodeProps,
 } from "@xyflow/react";
 
 export const NodeCircle = ({
   data,
   positionAbsoluteX,
-  positionAbsoluteY
+  positionAbsoluteY,
 }: NodeProps<BuiltInNode>) => {
   const nodeId = useNodeId();
   const { setNodes } = useReactFlow();
@@ -50,7 +50,6 @@ export const NodeCircle = ({
       <div className="node-coords-circle">
         ({Math.round(positionAbsoluteX)}, {Math.round(positionAbsoluteY)})
       </div>
-
       <Handle type="source" position={Position.Bottom} id="bottom" />
       <Handle type="source" position={Position.Right} id="right" />
     </div>

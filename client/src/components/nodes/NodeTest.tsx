@@ -5,13 +5,13 @@ import {
   useReactFlow,
   useNodeId,
   type BuiltInNode,
-  type NodeProps
+  type NodeProps,
 } from "@xyflow/react";
 
 export const NodeTest = ({
   data,
   positionAbsoluteX,
-  positionAbsoluteY
+  positionAbsoluteY,
 }: NodeProps<BuiltInNode>) => {
   const nodeId = useNodeId();
   const { setNodes } = useReactFlow();
@@ -26,12 +26,10 @@ export const NodeTest = ({
       )
     );
   }, [labelValue, nodeId, setNodes]);
-
   return (
     <div className="node-test">
       <Handle type="source" position={Position.Top} id="top" />
       <Handle type="source" position={Position.Left} id="left" />
-
       {isEditing ? (
         <input
           className="editable-input"

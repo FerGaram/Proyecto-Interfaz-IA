@@ -128,8 +128,13 @@ function Flow() {
   // Hooks para obtener y asignar nuevos nodos y aristas
   const [nodes, setNodes] = useState(nodosIniciales);
   const [edges, setEdges] = useState(aristasIniciales);
-  const [algoritmo, setAlgoritmo] = useState('BFS')
-  const [modoSeleccion, setModoSeleccion] = useState<"inicio" | "final" | null>(null)
+  const [minimized, setMinimized] = useState(false); //se agrega para ocuptar postit
+
+  const [algoritmo, setAlgoritmo] = useState("BFS");
+  const [modoSeleccion, setModoSeleccion] = useState<"inicio" | "final" | null>(
+    null
+  );
+
   // Hooks para conservar el último ID de nodo añadido
   const ultimoId = useRef(3); // Está así para contar las dos iniciales, si esas se borran, recuerden cambiar este valor
   // Valores para coordenadas que se usan cuando se añade un nodo individual
@@ -137,11 +142,8 @@ function Flow() {
   const yPos = useRef(50);
 
   // Hooks para almacenar los nodos iniciales y finales
-  const [nodoInicial, setNodoInicial] = useState('')
-  const [nodoFinal, setNodoFinal] = useState('')
-
-  // Hook para el estado del panel minimizable
-  const [minimized, setMinimized] = useState(false);
+  const [nodoInicial, setNodoInicial] = useState("");
+  const [nodoFinal, setNodoFinal] = useState("");
 
   // Handler para añadir/modificar/eliminar nodos, no hace falta modificar
   const onNodesChange = useCallback(
@@ -149,7 +151,9 @@ function Flow() {
       setNodes((nds) => applyNodeChanges(changes, nds)),
     []
   );
+
   const [selectedType, setSelectedType] = useState("nodeTest");
+
   // Handler para añadir un nodo específico
   const addNode = useCallback(() => {
     ultimoId.current++;
@@ -172,21 +176,18 @@ function Flow() {
   );
 
   // Handler para manejar la conexión de nodos, no hace falta modificar
-  const onConnect = useCallback(
-    (params: any) => {
-      const nuevoPeso = prompt("Ingrese el peso de la arista:", "1.0") || "1.0"
-      const pesoNum = parseFloat(nuevoPeso)
+  const onConnect = useCallback((params: any) => {
+    const nuevoPeso = prompt("Ingrese el peso de la arista:", "1.0") || "1.0";
+    const pesoNum = parseFloat(nuevoPeso);
 
-      const edgeConPeso = {
-        ...params,
-        label: nuevoPeso,
-        data: { peso: pesoNum },
-      }
+    const edgeConPeso = {
+      ...params,
+      label: nuevoPeso,
+      data: { peso: pesoNum },
+    };
 
-      setEdges((eds) => addEdge(edgeConPeso, eds))
-    },
-    []
-  )
+    setEdges((eds) => addEdge(edgeConPeso, eds));
+  }, []);
 
   // Handler para botón de prueba, muestra en la consola la estructura de los nodos y aristas
   const pruebaOnClick = () => {
@@ -206,34 +207,56 @@ function Flow() {
   }, []);
 
   const ejecutarAlgoritmo = async () => {
+    const data = convertirAGrafoJSON(
+      nodes,
+      edges,
+      nodoInicial,
+      nodoFinal,
+      algoritmo
+    );
+
     if (!nodoInicial || !nodoFinal) {
-      alert("Selecciona nodo inicial y final.")
-      return
+      alert("Selecciona nodo inicial y final.");
+      return;
     }
-    const cuerpo = convertirAGrafoJSON(nodes, edges, nodoInicial, nodoFinal, algoritmo)
-    console.log("Datos enviados al servidor:", cuerpo)
+
+    const cuerpo = convertirAGrafoJSON(
+      nodes,
+      edges,
+      nodoInicial,
+      nodoFinal,
+      algoritmo
+    );
+    console.log("Datos enviados al servidor:", cuerpo);
     try {
-      const resp = await fetch('http://localhost:8000/buscar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cuerpo)
-      })
-      const resultado = await resp.json()
+      const resp = await fetch("http://localhost:8000/buscar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cuerpo),
+      });
+      const resultado = await resp.json();
+
       if (resp.ok) {
-        console.log("Camino:", resultado.camino)
-        alert(`Camino: ${resultado.camino.join(" → ")}\nCosto: ${resultado.costo}`)
+        console.log("Camino:", resultado.camino);
+        alert(
+          `Camino: ${resultado.camino.join(" → ")}\nCosto: ${resultado.costo}`
+        );
       } else {
-        alert("Error: " + resultado.detail)
+        alert("Error: " + resultado.detail);
       }
     } catch (err) {
-      console.error(err)
-      alert("Error de conexión con el servidor.")
+      console.error(err);
+      alert("Error de conexión con el servidor.");
     }
-  }
+  };
 
   // Historial para deshacer (Ctrl+Z) y rehacer (Ctrl+Y)
-  const [history, setHistory] = useState<{ nodes: defaultNodeModel[]; edges: defaultEdgeModel[] }[]>([]);
-  const [redoHistory, setRedoHistory] = useState<{ nodes: defaultNodeModel[]; edges: defaultEdgeModel[] }[]>([]);
+  const [history, setHistory] = useState<
+    { nodes: defaultNodeModel[]; edges: defaultEdgeModel[] }[]
+  >([]);
+  const [redoHistory, setRedoHistory] = useState<
+    { nodes: defaultNodeModel[]; edges: defaultEdgeModel[] }[]
+  >([]);
   // Portapapeles para copiar/pegar/cortar/duplicar
   const clipboard = useRef<defaultNodeModel[] | null>(null);
 
@@ -315,7 +338,7 @@ function Flow() {
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-    document.body.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    document.body.setAttribute("data-theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
   const theme = createTheme({
@@ -383,11 +406,11 @@ function Flow() {
           onConnect={onConnect} // Handler de conexiones
           onNodeClick={(_, node) => {
             if (modoSeleccion === "inicio") {
-              setNodoInicial(node.id)
-              setModoSeleccion(null) // desactiva modo
+              setNodoInicial(node.id);
+              setModoSeleccion(null); // desactiva modo
             } else if (modoSeleccion === "final") {
-              setNodoFinal(node.id)
-              setModoSeleccion(null)
+              setNodoFinal(node.id);
+              setModoSeleccion(null);
             }
           }}
           fitView // Ajusta la pantalla para contener y centrar los nodos iniciales
@@ -407,63 +430,77 @@ function Flow() {
             <Box
               className="panel-box"
               sx={{
-                bgcolor: 'background.paper',
-                color: 'text.primary',
-                border: '1.5px solid',
-                borderColor: 'divider',
-                borderRadius: '10px',
-                padding: '14px 18px',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-                fontSize: '1rem',
-                minWidth: '220px',
-                margin: '8px 0',
+                bgcolor: "background.paper",
+                color: "text.primary",
+                border: "1.5px solid",
+                borderColor: "divider",
+                borderRadius: "10px",
+                padding: "14px 18px",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+                fontSize: "1rem",
+                minWidth: "220px",
+                margin: "8px 0",
               }}
             >
-              <Typography sx={{ fontSize: '16px', fontWeight: 500 }}>
+              <Typography sx={{ fontSize: "16px", fontWeight: 500 }}>
                 Nodo inicial: {nodoInicial || "Sin seleccionar"}
               </Typography>
-              <Typography sx={{ fontSize: '16px', fontWeight: 500 }}>
+              <Typography sx={{ fontSize: "16px", fontWeight: 500 }}>
                 Nodo final: {nodoFinal || "Sin seleccionar"}
               </Typography>
-
               <Stack spacing={1} mt={2}>
-                <Button variant="contained" size="small" onClick={() => setModoSeleccion("inicio")}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => setModoSeleccion("inicio")}
+                >
                   Seleccionar nodo inicial
                 </Button>
-                <Button variant="contained" size="small" onClick={() => setModoSeleccion("final")}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => setModoSeleccion("final")}
+                >
                   Seleccionar nodo final
                 </Button>
-                <Button variant="outlined" size="small" color="error" onClick={() => {
-                  setNodoInicial("");
-                  setNodoFinal("");
-                }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  color="error"
+                  onClick={() => {
+                    setNodoInicial("");
+                    setNodoFinal("");
+                  }}
+                >
                   Limpiar selección
                 </Button>
               </Stack>
 
               {modoSeleccion && (
-                <Typography sx={{ fontSize: '14px', mt: 2 }}>
-                  Haz clic en un nodo para asignar como <strong>{modoSeleccion}</strong>
+                <Typography sx={{ fontSize: "14px", mt: 2 }}>
+                  Haz clic en un nodo para asignar como{" "}
+                  <strong>{modoSeleccion}</strong>
                 </Typography>
               )}
             </Box>
           </Panel>
-
           <Panel position="top-center">
             <Box
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 gap: 2,
-                bgcolor: darkMode ? 'rgba(30,30,40,0.55)' : 'rgba(220,220,230,0.75)',
-                backdropFilter: 'blur(8px)',
-                borderRadius: '12px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
-                padding: '16px 32px',
-                margin: '0 auto',
+                bgcolor: darkMode
+                  ? "rgba(30,30,40,0.55)"
+                  : "rgba(220,220,230,0.75)",
+                backdropFilter: "blur(8px)",
+                borderRadius: "12px",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.10)",
+                padding: "16px 32px",
+                margin: "0 auto",
                 minWidth: 600,
-                maxWidth: '90vw',
+                maxWidth: "90vw",
               }}
             >
               <CloudDropdown
@@ -480,15 +517,19 @@ function Flow() {
                   sx={{
                     minWidth: 180,
                     fontWeight: 600,
-                    fontSize: '1rem',
-                    borderRadius: '8px',
-                    boxShadow: 'none',
-                    backdropFilter: 'blur(8px)',
-                    bgcolor: darkMode ? 'rgba(40,60,90,0.85)' : 'background.paper',
-                    color: darkMode ? 'primary.main' : 'primary.dark',
-                    border: '1.5px solid',
-                    borderColor: 'primary.main',
-                    '&:hover': { bgcolor: darkMode ? 'rgba(40,60,120,0.95)' : 'grey.100' }
+                    fontSize: "1rem",
+                    borderRadius: "8px",
+                    boxShadow: "none",
+                    backdropFilter: "blur(8px)",
+                    bgcolor: darkMode
+                      ? "rgba(40,60,90,0.85)"
+                      : "background.paper",
+                    color: darkMode ? "primary.main" : "primary.dark",
+                    border: "1.5px solid",
+                    borderColor: "primary.main",
+                    "&:hover": {
+                      bgcolor: darkMode ? "rgba(40,60,120,0.95)" : "grey.100",
+                    },
                   }}
                   onClick={addNode}
                 >
@@ -500,15 +541,19 @@ function Flow() {
                   sx={{
                     minWidth: 180,
                     fontWeight: 600,
-                    fontSize: '1rem',
-                    borderRadius: '8px',
-                    boxShadow: 'none',
-                    backdropFilter: 'blur(8px)',
-                    bgcolor: darkMode ? 'rgba(80,60,120,0.7)' : 'background.paper',
-                    color: darkMode ? 'secondary.light' : 'secondary.dark',
-                    border: '1.5px solid',
-                    borderColor: 'secondary.main',
-                    '&:hover': { bgcolor: darkMode ? 'rgba(120,80,180,0.85)' : 'grey.100' }
+                    fontSize: "1rem",
+                    borderRadius: "8px",
+                    boxShadow: "none",
+                    backdropFilter: "blur(8px)",
+                    bgcolor: darkMode
+                      ? "rgba(80,60,120,0.7)"
+                      : "background.paper",
+                    color: darkMode ? "secondary.light" : "secondary.dark",
+                    border: "1.5px solid",
+                    borderColor: "secondary.main",
+                    "&:hover": {
+                      bgcolor: darkMode ? "rgba(120,80,180,0.85)" : "grey.100",
+                    },
                   }}
                   onClick={limpiarPantalla}
                 >
@@ -520,15 +565,19 @@ function Flow() {
                   sx={{
                     minWidth: 180,
                     fontWeight: 600,
-                    fontSize: '1rem',
-                    borderRadius: '8px',
-                    boxShadow: 'none',
-                    backdropFilter: 'blur(8px)',
-                    bgcolor: darkMode ? 'rgba(40,80,90,0.7)' : 'background.paper',
-                    color: darkMode ? 'info.light' : 'info.dark',
-                    border: '1.5px solid',
-                    borderColor: 'info.main',
-                    '&:hover': { bgcolor: darkMode ? 'rgba(40,120,140,0.85)' : 'grey.100' }
+                    fontSize: "1rem",
+                    borderRadius: "8px",
+                    boxShadow: "none",
+                    backdropFilter: "blur(8px)",
+                    bgcolor: darkMode
+                      ? "rgba(40,80,90,0.7)"
+                      : "background.paper",
+                    color: darkMode ? "info.light" : "info.dark",
+                    border: "1.5px solid",
+                    borderColor: "info.main",
+                    "&:hover": {
+                      bgcolor: darkMode ? "rgba(40,120,140,0.85)" : "grey.100",
+                    },
                   }}
                   onClick={pruebaOnClick}
                 >
@@ -539,19 +588,23 @@ function Flow() {
                   sx={{
                     minWidth: 180,
                     fontWeight: 600,
-                    fontSize: '1rem',
-                    borderRadius: '8px',
-                    boxShadow: 'none',
-                    backdropFilter: 'blur(8px)',
-                    bgcolor: darkMode ? 'rgba(40,60,90,0.5)' : 'background.paper',
-                    color: darkMode ? 'primary.light' : 'primary.dark',
-                    border: '1.5px solid',
-                    borderColor: 'primary.main',
-                    '&:hover': { bgcolor: darkMode ? 'rgba(40,60,120,0.7)' : 'grey.100' }
+                    fontSize: "1rem",
+                    borderRadius: "8px",
+                    boxShadow: "none",
+                    backdropFilter: "blur(8px)",
+                    bgcolor: darkMode
+                      ? "rgba(40,60,90,0.5)"
+                      : "background.paper",
+                    color: darkMode ? "primary.light" : "primary.dark",
+                    border: "1.5px solid",
+                    borderColor: "primary.main",
+                    "&:hover": {
+                      bgcolor: darkMode ? "rgba(40,60,120,0.7)" : "grey.100",
+                    },
                   }}
                   onClick={() => setDarkMode(!darkMode)}
                 >
-                  {darkMode ? 'MODO CLARO' : 'MODO OSCURO'}
+                  {darkMode ? "MODO CLARO" : "MODO OSCURO"}
                 </Button>
               </Stack>
             </Box>
@@ -563,43 +616,43 @@ function Flow() {
               className={`postit${minimized ? " minimized" : ""}`}
               onClick={() => setMinimized(!minimized)}
               sx={{
-                bgcolor: darkMode ? 'rgba(40,40,40,0.96)' : 'background.paper',
-                color: 'text.primary',
-                width: minimized ? '80px' : '320px',
-                minHeight: minimized ? '32px' : '120px',
-                padding: minimized ? '10px 8px' : '20px 18px',
-                borderRadius: '10px 40px 10px 10px',
-                boxShadow: '2px 4px 16px rgba(0, 0, 0, 0.15)',
-                fontFamily: '\'Segoe UI\', Arial, sans-serif',
-                fontSize: minimized ? '0.9rem' : '1rem',
-                margin: '24px auto',
-                position: 'relative',
-                transition: 'all 0.3s cubic-bezier(.4, 2, .6, 1)',
-                overflow: 'hidden',
-                display: 'block',
-                textAlign: minimized ? 'center' : 'left',
-                cursor: 'pointer',
-                '&:hover': {
-                  boxShadow: '4px 8px 24px rgba(0, 0, 0, 0.2)',
+                bgcolor: darkMode ? "rgba(40,40,40,0.96)" : "background.paper",
+                color: "text.primary",
+                width: minimized ? "80px" : "320px",
+                minHeight: minimized ? "32px" : "120px",
+                padding: minimized ? "10px 8px" : "20px 18px",
+                borderRadius: "10px 40px 10px 10px",
+                boxShadow: "2px 4px 16px rgba(0, 0, 0, 0.15)",
+                fontFamily: "'Segoe UI', Arial, sans-serif",
+                fontSize: minimized ? "0.9rem" : "1rem",
+                margin: "24px auto",
+                position: "relative",
+                transition: "all 0.3s cubic-bezier(.4, 2, .6, 1)",
+                overflow: "hidden",
+                display: "block",
+                textAlign: minimized ? "center" : "left",
+                cursor: "pointer",
+                "&:hover": {
+                  boxShadow: "4px 8px 24px rgba(0, 0, 0, 0.2)",
                 },
-                '& .top-right-header': {
-                  color: 'text.primary',
-                  fontSize: '18px',
+                "& .top-right-header": {
+                  color: "text.primary",
+                  fontSize: "18px",
                   marginTop: 0,
-                  marginBottom: '10px',
+                  marginBottom: "10px",
                 },
-                '& .top-right-text': {
-                  color: 'text.secondary',
-                  fontSize: '16px',
+                "& .top-right-text": {
+                  color: "text.secondary",
+                  fontSize: "16px",
                   margin: 0,
-                  paddingLeft: '18px',
-                  '& li': {
-                    marginBottom: '8px',
-                  }
+                  paddingLeft: "18px",
+                  "& li": {
+                    marginBottom: "8px",
+                  },
                 },
-                '& .minimized ul, & .minimized h4, & .minimized br': {
-                  display: 'none',
-                }
+                "& .minimized ul, & .minimized h4, & .minimized br": {
+                  display: "none",
+                },
               }}
               title="Haz clic para expandir o reducir"
             >
@@ -614,19 +667,38 @@ function Flow() {
                 </li>
                 <li>Borrar nodo/arista: haz clic y pulsa Retroceso</li>
                 <li>
-                  Conectar nodos: haz clic y arrastra desde un conector, y suelta
-                  en otro del nodo a conectar
+                  Conectar nodos: haz clic y arrastra desde un conector, y
+                  suelta en otro del nodo a conectar
                 </li>
               </ul>
-              <div style={{ fontSize: '0.75rem', color: theme.palette.text.secondary, marginTop: 8 }}>
+              <div
+                style={{
+                  fontSize: "0.75rem",
+                  color: theme.palette.text.secondary,
+                  marginTop: 8,
+                }}
+              >
                 <b>Atajos útiles:</b>
                 <ul style={{ margin: 0, paddingLeft: 18 }}>
-                  <li><b>Ctrl+Z</b>: Deshacer</li>
-                  <li><b>Ctrl+Y</b>: Rehacer</li> {/* <-- Añadido atajo Ctrl+Y */}
-                  <li><b>Ctrl+C</b>: Copiar nodo(s) seleccionado(s)</li>
-                  <li><b>Ctrl+V</b>: Pegar nodo(s)</li>
-                  <li><b>Ctrl+X</b>: Cortar nodo(s)</li>
-                  <li><b>Ctrl+D</b>: Duplicar nodo(s)</li>
+                  <li>
+                    <b>Ctrl+Z</b>: Deshacer
+                  </li>
+                  <li>
+                    <b>Ctrl+Y</b>: Rehacer
+                  </li>{" "}
+                  {/* <-- Añadido atajo Ctrl+Y */}
+                  <li>
+                    <b>Ctrl+C</b>: Copiar nodo(s) seleccionado(s)
+                  </li>
+                  <li>
+                    <b>Ctrl+V</b>: Pegar nodo(s)
+                  </li>
+                  <li>
+                    <b>Ctrl+X</b>: Cortar nodo(s)
+                  </li>
+                  <li>
+                    <b>Ctrl+D</b>: Duplicar nodo(s)
+                  </li>
                 </ul>
               </div>
             </Box>

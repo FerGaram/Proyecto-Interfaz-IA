@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 interface KeyboardShortcutsProps {
   onUndo: () => void;
-  onRedo: () => void; // <-- Añadido de nuevo
+  onRedo: () => void;
   onCopy: () => void;
   onPaste: () => void;
   onCut: () => void;
@@ -11,7 +11,7 @@ interface KeyboardShortcutsProps {
 
 export const KeyboardShortcuts = ({
   onUndo,
-  onRedo, // <-- Añadido de nuevo
+  onRedo,
   onCopy,
   onPaste,
   onCut,

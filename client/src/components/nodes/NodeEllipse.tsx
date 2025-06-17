@@ -5,13 +5,13 @@ import {
   useReactFlow,
   useNodeId,
   type BuiltInNode,
-  type NodeProps
+  type NodeProps,
 } from "@xyflow/react";
 
 export const NodeEllipse = ({
   data,
   positionAbsoluteX,
-  positionAbsoluteY
+  positionAbsoluteY,
 }: NodeProps<BuiltInNode>) => {
   const nodeId = useNodeId();
   const { setNodes } = useReactFlow();
@@ -26,7 +26,6 @@ export const NodeEllipse = ({
       )
     );
   }, [labelValue, nodeId, setNodes]);
-
   return (
     <div className="node-ellipse">
       <Handle type="source" position={Position.Top} id="top" />

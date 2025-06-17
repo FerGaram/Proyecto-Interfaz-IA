@@ -36,6 +36,7 @@ body:not([data-theme='dark']) {
   display: block;
   font-size: 12px;
 }
+
 .node-coords {
   position: absolute;
   top: 100%;      
@@ -47,6 +48,7 @@ body:not([data-theme='dark']) {
   margin-top: 2px;
   white-space: nowrap;
 }
+
 .editable-input {
   width: 90%;
   padding: 4px;
@@ -57,7 +59,7 @@ body:not([data-theme='dark']) {
 }
 
 .node-circle {
-  width: 60px;
+  width: 60px;              
   height: 60px;
   border: 1px solid var(--node-border);
   border-radius: 50%;
@@ -68,7 +70,7 @@ body:not([data-theme='dark']) {
   justify-content: center;
   position: relative;
   box-sizing: border-box;
-  padding: 4px;
+  padding: 4px;               
 }
 
 .node-circle label {
@@ -100,7 +102,7 @@ body:not([data-theme='dark']) {
 }
 
 .node-ellipse {
-  width: 80px;
+  width: 80px;      
   height: 50px;
   border: 1px solid var(--node-border);
   border-radius: 50%;
@@ -141,6 +143,7 @@ body:not([data-theme='dark']) {
   border-radius: 4px;
   text-align: center;
 }
+
 .node-rombo {
   width: 60px;
   height: 60px;
