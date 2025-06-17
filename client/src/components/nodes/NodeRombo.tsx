@@ -8,7 +8,7 @@ import {
   type NodeProps,
 } from "@xyflow/react";
 
-export const NodeTest = ({
+export const NodeRombo = ({
   data,
   positionAbsoluteX,
   positionAbsoluteY,
@@ -27,25 +27,28 @@ export const NodeTest = ({
     );
   }, [labelValue, nodeId, setNodes]);
   return (
-    <div className="node-test">
+    <div className="node-rombo">
       <Handle type="source" position={Position.Top} id="top" />
       <Handle type="source" position={Position.Left} id="left" />
-      {isEditing ? (
-        <input
-          className="editable-input"
-          autoFocus
-          value={labelValue}
-          onChange={(e) => setLabelValue(e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") e.currentTarget.blur();
-          }}
-        />
-      ) : (
-        <label onDoubleClick={() => setIsEditing(true)}>{data.label}</label>
-      )}
 
-      <div className="node-coords">
+      <div className="rhombus-content">
+        {isEditing ? (
+          <input
+            className="editable-input"
+            autoFocus
+            value={labelValue}
+            onChange={(e) => setLabelValue(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.currentTarget.blur();
+            }}
+          />
+        ) : (
+          <label onDoubleClick={() => setIsEditing(true)}>{data.label}</label>
+        )}
+      </div>
+
+      <div className="node-coords-rombo">
         ({Math.round(positionAbsoluteX)}, {Math.round(positionAbsoluteY)})
       </div>
 

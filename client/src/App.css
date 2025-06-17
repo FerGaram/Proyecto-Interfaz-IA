@@ -58,7 +58,8 @@
 }
 
 .custom-btn {
-  background-color: #586673;
+  /*background-color: #586673;*/
+  background-image: linear-gradient(155deg, #546980c6, #546980);
   color: #fff;
   border: none;
   padding: 15px 18px;
@@ -92,65 +93,142 @@
    Post-it de la sección "Controles"
 -------------------------------------------- */
 .postit {
-  /*background: #fff475;
-    background-color: #546980;
-  */
-  background-color: #5469806b;
-  color: #333;
+  /* background: #fff475; */
+  /* background-color: #546980; */
+  /* background-image: linear-gradient(155deg, #546980c6, #546980); */
+
+  /* color: #333; */ /* Removed for theme compatibility */
   width: 320px;
   min-height: 120px;
   padding: 20px 18px;
   border-radius: 10px 40px 10px 10px;
-  box-shadow: 2px 4px 16px rgba(0,0,0,0.15);
+  box-shadow: 2px 4px 16px rgba(0, 0, 0, 0.15);
   font-family: 'Segoe UI', Arial, sans-serif;
   font-size: 1rem;
-  margin: 24px auto; /* Centrado horizontal */
+  margin: 24px auto;
+  /* Centrado horizontal */
   position: relative;
-  transition: all 0.3s cubic-bezier(.4,2,.6,1);
+  transition: all 0.3s cubic-bezier(.4, 2, .6, 1);
   overflow: hidden;
-  display: block; /* Asegura el centrado */
+  display: block;
+  /* Asegura el centrado */
   text-align: left;
 }
+
 .postit.minimized {
   width: 80px;
   min-height: 32px;
   padding: 10px 8px;
   font-size: 0.9rem;
   cursor: pointer;
-  margin: 24px auto; /* Mantiene el centrado al minimizar */
+  margin: 24px auto;
+  /* Mantiene el centrado al minimizar */
   text-align: center;
 }
+
 .postit.minimized ul,
 .postit.minimized h4,
 .postit.minimized br {
   display: none;
 }
+
 .postit h4 {
   margin-top: 0;
   margin-bottom: 10px;
 }
+
 .postit ul {
   margin: 0;
   padding-left: 18px;
 }
+
 .postit li {
   margin-bottom: 8px;
 }
+
 .postit:hover {
-  box-shadow: 4px 8px 24px rgba(0,0,0,0.2);
+  box-shadow: 4px 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 /* -------------------------------------------
    Panel superior izquierdo (nodo inicial/final)
 -------------------------------------------- */
 .panel-box {
-  background-color: #5469806b;
+  /* background-image: linear-gradient(155deg, #546980c6, #546980); */
   border: 1.5px solid #bdbdbd;
   border-radius: 10px;
   padding: 14px 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   font-size: 1rem;
   color: #222;
   min-width: 180px;
   margin: 8px 0;
+
+}
+
+.add-node-controls-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.custom-dropdown {
+  /* background-color: #586673; */ /* Removed for theme compatibility */
+  /* color: #fff; */ /* Removed for theme compatibility */
+  border: none;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  appearance: none;
+}
+
+.custom-dropdown.small {
+  min-width: 120px;
+  width: auto;
+}
+
+.custom-dropdown:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #9aa8b6;
+}
+
+.dropdown-wrapper {
+  position: relative;
+}
+
+.dropdown-wrapper::after {
+  content: "▼";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  /* color: #fff; */ /* Color handled by sx prop in App.tsx */
+  font-size: 0.7rem;
+}
+
+.top-left-text {
+  color: #eee;
+  font-size: 16px;
+}
+
+.top-right-header {
+  color: #eee;
+  font-size: 18px;
+}
+
+.top-right-text {
+  color: #eee;
+  font-size: 16px;
+}
+
+/* Fuerza el fondo y color de los controles de React Flow para que siempre sean blancos y no cambien con el tema */
+.react-flow__controls {
+  background: #fff !important;
+}
+.react-flow__controls-button {
+  background: #fff !important;
+  color: #222 !important;
+  border-bottom: 1px solid #eee !important;
 }

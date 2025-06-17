@@ -8,7 +8,7 @@ import {
   type NodeProps,
 } from "@xyflow/react";
 
-export const NodeTest = ({
+export const NodeEllipse = ({
   data,
   positionAbsoluteX,
   positionAbsoluteY,
@@ -27,9 +27,10 @@ export const NodeTest = ({
     );
   }, [labelValue, nodeId, setNodes]);
   return (
-    <div className="node-test">
+    <div className="node-ellipse">
       <Handle type="source" position={Position.Top} id="top" />
       <Handle type="source" position={Position.Left} id="left" />
+
       {isEditing ? (
         <input
           className="editable-input"
@@ -45,7 +46,7 @@ export const NodeTest = ({
         <label onDoubleClick={() => setIsEditing(true)}>{data.label}</label>
       )}
 
-      <div className="node-coords">
+      <div className="node-coords-ellipse">
         ({Math.round(positionAbsoluteX)}, {Math.round(positionAbsoluteY)})
       </div>
 
