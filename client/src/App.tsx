@@ -862,7 +862,7 @@ function Flow() {
                     { value: "DFS", label: "DFS (Profundidad)" },
                     { value: "IDDFS", label: "IDDFS" },
                     { value: "Costo Uniforme", label: "Costo Uniforme" },
-                    { value: "Ávara", label: "Ávara" },
+                    { value: "Ávara", label: "Avara" },
                     { value: "A*", label: "A*" },
                   ]}
                   minWidth={200}
