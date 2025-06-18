@@ -49,12 +49,6 @@ const nodeTypes = {
 // Lista de nodos iniciales de prueba, se podrían borrar más adelante
 const nodosIniciales: Array<defaultNodeModel> = [
 
-  {
-    id: "0",
-    position: { x: -81, y: 19 },
-    data: { label: "Robot" },
-    type: "nodeRobot",
-  },
 
 ];
 
