@@ -34,6 +34,7 @@ import { useRobotMovement } from "./components/useRobotMovement";
 import { convertirAGrafoJSON } from "./controllers/toFromJson";
 import { CloudDropdown } from "./components/CloudDropdown";
 import { NodeEmpty } from "./components/nodes/NodeEmpty";
+import { NodeGroupTest } from "./components/nodes/NodeGroupTest";
 
 // Aquí se deben importar los nodos personalizados que se hayan hecho
 const nodeTypes = {
@@ -43,6 +44,7 @@ const nodeTypes = {
   nodeRombo: NodeRombo,
   nodeRobot: RobotNode,
   nodeEmpty: NodeEmpty, // Nodo vacío, únicamente el Handle
+  nodeGroupTest: NodeGroupTest,
 };
 
 // Lista de nodos iniciales de prueba, se podrían borrar más adelante
@@ -76,27 +78,30 @@ const nodosIniciales: Array<defaultNodeModel> = [
     id: "-1",
     position: { x: -100, y: -100 },
     data: { label: "" },
-    height: 20,
-    width: 100,
-    type: "group"
+    type: "nodeGroupTest",
   },
-  // NodesEmpty que están en el group anterior
+  // NodesEmpty que forman la figura de la imagen
   {
     id: "-2",
-    position: { x: 10, y: 10 },
+    position: { x: 10, y: 20 },
     data: { label: "" },
     type: "nodeEmpty",
     parentId: "-1",
-    draggable: false,
   },
   {
     id: "-3",
-    position: { x: 90, y: 10 },
+    position: { x: 88, y: 20 },
     data: { label: "" },
     type: "nodeEmpty",
     parentId: "-1",
-    draggable: false,
-  }
+  },
+  {
+    id: "-4",
+    position: { x: 50, y: 88 },
+    data: { label: "" },
+    type: "nodeEmpty",
+    parentId: "-1",
+  },
 ];
 
 // Lista de aristas iniciales de prueba, se podrían borrar más adelante
