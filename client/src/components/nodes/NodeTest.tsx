@@ -46,6 +46,7 @@ export const NodeTest = ({
           pointerEvents: "auto", 
         }}
       />
+      
 
       {isEditing ? (
         <input
