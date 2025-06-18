@@ -34,6 +34,7 @@ import { useRobotMovement } from "./components/useRobotMovement";
 import { convertirAGrafoJSON } from "./controllers/toFromJson";
 import { CloudDropdown } from "./components/CloudDropdown";
 import { NodeEmpty } from "./components/nodes/NodeEmpty";
+import { generarConexionesSinColision } from "./utils/autoConnectUtils";
 
 // Aquí se deben importar los nodos personalizados que se hayan hecho
 const nodeTypes = {
@@ -568,6 +569,7 @@ function Flow() {
           fitView // Ajusta la pantalla para contener y centrar los nodos iniciales
           connectionMode={ConnectionMode.Loose} // Se define de esta forma para que los conectores puedan iniciar y terminar conexiones
           colorMode={darkMode ? "dark" : "light"}
+          defaultEdgeOptions={{ type: 'straight' }}
         >
           <Background /* Fondo punteado */ />
           <Controls /* Botones de la esquina inferior izquierda */ />
@@ -733,9 +735,13 @@ function Flow() {
                       bgcolor: darkMode ? "rgba(40,120,140,0.85)" : "grey.100",
                     },
                   }}
-                  onClick={pruebaOnClick}
+                  onClick={() => {
+                    const nuevas = generarConexionesSinColision(nodes);
+                    setEdges(nuevas);
+                    alert("Conexiones generadas automáticamente");
+                  }}
                 >
-                  IMPRIMIR NODOS Y ARISTAS
+                  GENERAR CONEXIONES
                 </Button>
                 <Button
                   variant="outlined"

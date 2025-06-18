@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import {
   Handle,
-  Position,
   useReactFlow,
   useNodeId,
   type BuiltInNode,
@@ -26,10 +25,28 @@ export const NodeTest = ({
       )
     );
   }, [labelValue, nodeId, setNodes]);
+
   return (
-    <div className="node-test">
-      <Handle type="source" position={Position.Top} id="top" />
-      <Handle type="source" position={Position.Left} id="left" />
+    <div className="node-test" style={{ position: "relative" }}>
+      {/* Único handle central */}
+      <Handle
+        type="source"
+        position="top"
+        id="center"
+        style={{
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          background: "#555",
+          width: 10,
+          height: 10,
+          borderRadius: "50%",
+          position: "absolute",
+          opacity: 0,
+          pointerEvents: "auto", 
+        }}
+      />
+
       {isEditing ? (
         <input
           className="editable-input"
@@ -48,9 +65,6 @@ export const NodeTest = ({
       <div className="node-coords">
         ({Math.round(positionAbsoluteX)}, {Math.round(positionAbsoluteY)})
       </div>
-
-      <Handle type="source" position={Position.Bottom} id="bottom" />
-      <Handle type="source" position={Position.Right} id="right" />
     </div>
   );
 };
