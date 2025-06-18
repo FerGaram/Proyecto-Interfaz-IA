@@ -6,6 +6,4 @@ export interface defaultEdgeModel {
     target: string,
     targetHandle: string,
     label: string,
-    style?: any, // Permitir estilos dinámicos
-    selected?: boolean, // Permitir flag de selección
 }
