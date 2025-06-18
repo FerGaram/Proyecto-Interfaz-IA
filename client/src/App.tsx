@@ -18,30 +18,25 @@ import "./App.css";
 import type { defaultNodeModel } from "./models/defaultNodeModel";
 import type { defaultEdgeModel } from "./models/defaultEdgeModel";
 import { NodeTest } from "./components/nodes/NodeTest";
-import { NodeCircle } from "./components/nodes/NodeCircle";
-import { NodeEllipse } from "./components/nodes/NodeEllipse";
 import { NodeRombo } from "./components/nodes/NodeRombo";
 import { RobotNode } from "./components/nodes/RobotNode";
 import { KeyboardShortcuts } from "./components/KeyboardShortcuts";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography"; // Import Typography
-import { NodeTypeDropdown } from "./components/NodeTypeDropdown";
 import { useRobotMovement } from "./components/useRobotMovement";
 import { convertirAGrafoJSON } from "./controllers/toFromJson";
-import { CloudDropdown } from "./components/CloudDropdown";
 
 import { generarConexionesSinColision } from "./utils/autoConnectUtils";
+import { HelpPanel } from "./components/HelpPanel";
+import { NodeSelectionPanel } from "./components/NodeSelectionPanel";
+import { TopActionsPanel } from "./components/TopActionsPanel";
+import { AlgorithmPanel } from "./components/AlgorithmPanel";
+
 
 
 // Aquí se deben importar los nodos personalizados que se hayan hecho
 const nodeTypes = {
   nodeTest: NodeTest,
-  nodeCircle: NodeCircle,
-  nodeEllipse: NodeEllipse,
   nodeRombo: NodeRombo,
   nodeRobot: RobotNode,
 };
@@ -88,8 +83,6 @@ const aristasIniciales: Array<defaultEdgeModel> = [
 
 const nodeTypesArray = [
   { label: "Rectángulo", value: "nodeTest" },
-  { label: "Círculo", value: "nodeCircle" },
-  { label: "Elipse", value: "nodeEllipse" },
   { label: "Rombo", value: "nodeRombo" },
   // Agrega aquí tus tipos personalizados
 ];
@@ -97,17 +90,8 @@ const nodeTypesArray = [
 // Componente personalizado para MiniMap con tipado correcto
 function MiniMapNodeCustom(props: MiniMapNodeProps) {
   const {
-    x,
-    y,
-    width,
-    height,
-    style = {},
-    selected,
-    strokeColor,
-    strokeWidth: sw,
-    color,
-    borderRadius,
-    className,
+    x,y,width,height,style = {},selected,strokeColor,
+    strokeWidth: sw,color,borderRadius,className,
   } = props;
   const stroke = selected ? "#ff3333" : strokeColor || "#222";
   const strokeWidth = selected ? 6 : sw || 2;
@@ -115,32 +99,6 @@ function MiniMapNodeCustom(props: MiniMapNodeProps) {
 
   // Detecta tipo por className (React Flow pone el tipo de nodo en la clase)
   const typeClass = (className || "").toLowerCase();
-  if (typeClass.includes("circle")) {
-    const r = Math.min(Number(width), Number(height)) / 2 - strokeWidth;
-    return (
-      <circle
-        cx={String(Number(x) + Number(width) / 2)}
-        cy={String(Number(y) + Number(height) / 2)}
-        r={String(r)}
-        fill={String(fill)}
-        stroke={String(stroke)}
-        strokeWidth={String(strokeWidth)}
-      />
-    );
-  }
-  if (typeClass.includes("ellipse")) {
-    return (
-      <ellipse
-        cx={String(Number(x) + Number(width) / 2)}
-        cy={String(Number(y) + Number(height) / 2)}
-        rx={String(Number(width) / 2 - strokeWidth)}
-        ry={String(Number(height) / 2 - strokeWidth)}
-        fill={String(fill)}
-        stroke={String(stroke)}
-        strokeWidth={String(strokeWidth)}
-      />
-    );
-  }
   if (typeClass.includes("rombo")) {
     const cx = Number(x) + Number(width) / 2;
     const cy = Number(y) + Number(height) / 2;
@@ -183,8 +141,6 @@ function Flow() {
   // Hooks para obtener y asignar nuevos nodos y aristas
   const [nodes, setNodes] = useState(nodosIniciales);
   const [edges, setEdges] = useState(aristasIniciales);
-  const [minimized, setMinimized] = useState(false); //se agrega para ocuptar postit
-  const [currentSolutionPath, setCurrentSolutionPath] = useState<string[]>([]);
 
   const [algoritmo, setAlgoritmo] = useState("BFS");
   const [modoSeleccion, setModoSeleccion] = useState<"inicio" | "final" | null>(
@@ -557,398 +513,45 @@ function Flow() {
             nodeComponent={MiniMapNodeCustom}
           />
           <Panel position="top-left">
-            <Box
-              className="panel-box"
-              sx={{
-                bgcolor: "background.paper",
-                color: "text.primary",
-                border: "1.5px solid",
-                borderColor: "divider",
-                borderRadius: "10px",
-                padding: "14px 18px",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
-                fontSize: "1rem",
-                minWidth: "220px",
-                margin: "8px 0",
-              }}
-            >
-              <Typography sx={{ fontSize: "16px", fontWeight: 500 }}>
-                Nodo inicial: {nodoInicial || "Sin seleccionar"}
-              </Typography>
-              <Typography sx={{ fontSize: "16px", fontWeight: 500 }}>
-                Nodo final: {nodoFinal || "Sin seleccionar"}
-              </Typography>
-              <Stack spacing={1} mt={2}>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={() => setModoSeleccion("inicio")}
-                >
-                  Seleccionar nodo inicial
-                </Button>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={() => setModoSeleccion("final")}
-                >
-                  Seleccionar nodo final
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  color="error"
-                  onClick={() => {
-                    setNodoInicial("");
-                    setNodoFinal("");
-                  }}
-                >
-                  Limpiar selección
-                </Button>
-              </Stack>
+            <NodeSelectionPanel
+              nodoInicial={nodoInicial}
+              nodoFinal={nodoFinal}
+              setNodoInicial={setNodoInicial}
+              setNodoFinal={setNodoFinal}
+              modoSeleccion={modoSeleccion}
+              setModoSeleccion={setModoSeleccion}
+            />
+          </Panel>
 
-              {modoSeleccion && (
-                <Typography sx={{ fontSize: "14px", mt: 2 }}>
-                  Haz clic en un nodo para asignar como{" "}
-                  <strong>{modoSeleccion}</strong>
-                </Typography>
-              )}
-            </Box>
-          </Panel>
           <Panel position="top-center">
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 2,
-                bgcolor: darkMode
-                  ? "rgba(30,30,40,0.55)"
-                  : "rgba(220,220,230,0.75)",
-                backdropFilter: "blur(8px)",
-                borderRadius: "12px",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.10)",
-                padding: "16px 32px",
-                margin: "0 auto",
-                minWidth: 600,
-                maxWidth: "90vw",
-              }}
-            >
-              <CloudDropdown
-                label="Tipo de nodo"
-                value={selectedType}
-                setValue={setSelectedType}
-                options={nodeTypesArray}
-                minWidth={180}
-              />
-              <Stack direction="row" spacing={2} alignItems="center">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    minWidth: 180,
-                    fontWeight: 600,
-                    fontSize: "1rem",
-                    borderRadius: "8px",
-                    boxShadow: "none",
-                    backdropFilter: "blur(8px)",
-                    bgcolor: darkMode
-                      ? "rgba(40,60,90,0.85)"
-                      : "background.paper",
-                    color: darkMode ? "primary.main" : "primary.dark",
-                    border: "1.5px solid",
-                    borderColor: "primary.main",
-                    "&:hover": {
-                      bgcolor: darkMode ? "rgba(40,60,120,0.95)" : "grey.100",
-                    },
-                  }}
-                  onClick={addNode}
-                >
-                  AÑADIR NUEVO NODO
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  sx={{
-                    minWidth: 180,
-                    fontWeight: 600,
-                    fontSize: "1rem",
-                    borderRadius: "8px",
-                    boxShadow: "none",
-                    backdropFilter: "blur(8px)",
-                    bgcolor: darkMode
-                      ? "rgba(80,60,120,0.7)"
-                      : "background.paper",
-                    color: darkMode ? "secondary.light" : "secondary.dark",
-                    border: "1.5px solid",
-                    borderColor: "secondary.main",
-                    "&:hover": {
-                      bgcolor: darkMode ? "rgba(120,80,180,0.85)" : "grey.100",
-                    },
-                  }}
-                  onClick={limpiarPantalla}
-                >
-                  LIMPIAR PANTALLA
-                </Button>
-                <Button
-                  variant="text"
-                  color="info"
-                  sx={{
-                    minWidth: 180,
-                    fontWeight: 600,
-                    fontSize: "1rem",
-                    borderRadius: "8px",
-                    boxShadow: "none",
-                    backdropFilter: "blur(8px)",
-                    bgcolor: darkMode
-                      ? "rgba(40,80,90,0.7)"
-                      : "background.paper",
-                    color: darkMode ? "info.light" : "info.dark",
-                    border: "1.5px solid",
-                    borderColor: "info.main",
-                    "&:hover": {
-                      bgcolor: darkMode ? "rgba(40,120,140,0.85)" : "grey.100",
-                    },
-                  }}
-                  onClick={pruebaOnClick}
-                >
-                  IMPRIMIR NODOS Y ARISTAS
-                </Button>
-                <Button
-                  variant="outlined"
-                  sx={{
-                    minWidth: 180,
-                    fontWeight: 600,
-                    fontSize: "1rem",
-                    borderRadius: "8px",
-                    boxShadow: "none",
-                    backdropFilter: "blur(8px)",
-                    bgcolor: darkMode
-                      ? "rgba(40,60,90,0.5)"
-                      : "background.paper",
-                    color: darkMode ? "primary.light" : "primary.dark",
-                    border: "1.5px solid",
-                    borderColor: "primary.main",
-                    "&:hover": {
-                      bgcolor: darkMode ? "rgba(40,60,120,0.7)" : "grey.100",
-                    },
-                  }}
-                  onClick={() => setDarkMode(!darkMode)}
-                >
-                  {darkMode ? "MODO CLARO" : "MODO OSCURO"}
-                </Button>
-                <Button
-                  variant="contained"
-                  color="success"
-                  onClick={() => {
-                    const nuevas = generarConexionesSinColision(nodes);
-                    setEdges(nuevas);
-                    alert("Conexiones generadas automáticamente");
-                  }}
-                >
-                  Generar conexiones automáticas
-                </Button>
-              </Stack>
-            </Box>
+            <TopActionsPanel
+              darkMode={darkMode}
+              setDarkMode={setDarkMode}
+              selectedType={selectedType}
+              setSelectedType={setSelectedType}
+              nodeTypesArray={nodeTypesArray}
+              addNode={addNode}
+              limpiarPantalla={limpiarPantalla}
+              pruebaOnClick={pruebaOnClick}
+              setEdges={setEdges}
+              nodes={nodes}
+              generarConexionesSinColision={generarConexionesSinColision}
+            />
           </Panel>
-          <Panel
-            position="top-right" /* Panel para mostrar controles en la esquina superior derecha */
-          >
-            <Box
-              className={`postit${minimized ? " minimized" : ""}`}
-              onClick={() => setMinimized(!minimized)}
-              sx={{
-                bgcolor: darkMode ? "rgba(40,40,40,0.96)" : "background.paper",
-                color: "text.primary",
-                width: minimized ? "80px" : "320px",
-                minHeight: minimized ? "32px" : "120px",
-                padding: minimized ? "10px 8px" : "20px 18px",
-                borderRadius: "10px 40px 10px 10px",
-                boxShadow: "2px 4px 16px rgba(0, 0, 0, 0.15)",
-                fontFamily: "'Segoe UI', Arial, sans-serif",
-                fontSize: minimized ? "0.9rem" : "1rem",
-                margin: "24px auto",
-                position: "relative",
-                transition: "all 0.3s cubic-bezier(.4, 2, .6, 1)",
-                overflow: "hidden",
-                display: "block",
-                textAlign: minimized ? "center" : "left",
-                cursor: "pointer",
-                "&:hover": {
-                  boxShadow: "4px 8px 24px rgba(0, 0, 0, 0.2)",
-                },
-                "& .top-right-header": {
-                  color: "text.primary",
-                  fontSize: "18px",
-                  marginTop: 0,
-                  marginBottom: "10px",
-                },
-                "& .top-right-text": {
-                  color: "text.secondary",
-                  fontSize: "16px",
-                  margin: 0,
-                  paddingLeft: "18px",
-                  "& li": {
-                    marginBottom: "8px",
-                  },
-                },
-                "& .minimized ul, & .minimized h4, & .minimized br": {
-                  display: "none",
-                },
-              }}
-              title="Haz clic para expandir o reducir"
-            >
-              <center>
-                <h4 className="top-right-header">Controles</h4>
-              </center>
-              <ul className="top-right-text">
-                <li>Desplazarse: haz clic fuera de un nodo y arrastra</li>
-                <li>
-                  Seleccionar múltiples nodos: Shift + clic y arrastra para
-                  seleccionar múltiples nodos y aristas
-                </li>
-                <li>Borrar nodo/arista: haz clic y pulsa Retroceso</li>
-                <li>
-                  Conectar nodos: haz clic y arrastra desde un conector, y
-                  suelta en otro del nodo a conectar
-                </li>
-              </ul>
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  color: theme.palette.text.secondary,
-                  marginTop: 8,
-                }}
-              >
-                <b>Atajos útiles:</b>
-                <ul style={{ margin: 0, paddingLeft: 18 }}>
-                  <li>
-                    <b>Ctrl+Z</b>: Deshacer
-                  </li>
-                  <li>
-                    <b>Ctrl+Y</b>: Rehacer
-                  </li>{" "}
-                  {/* <-- Añadido atajo Ctrl+Y */}
-                  <li>
-                    <b>Ctrl+C</b>: Copiar nodo(s) seleccionado(s)
-                  </li>
-                  <li>
-                    <b>Ctrl+V</b>: Pegar nodo(s)
-                  </li>
-                  <li>
-                    <b>Ctrl+X</b>: Cortar nodo(s)
-                  </li>
-                  <li>
-                    <b>Ctrl+D</b>: Duplicar nodo(s)
-                  </li>
-                </ul>
-              </div>
-            </Box>
+
+          <HelpPanel darkMode={darkMode} />
+
+          <Panel position="bottom-center">
+            <AlgorithmPanel
+              darkMode={darkMode}
+              algoritmo={algoritmo}
+              setAlgoritmo={setAlgoritmo}
+              ejecutarAlgoritmo={ejecutarAlgoritmo}
+              clearSolutionPath={clearSolutionPath}
+              updateRobotSolutionPath={updateRobotSolutionPath}
+            />
           </Panel>
-          <Panel
-            position="bottom-center" /* Panel para mostrar opciones de algoritmos */
-          >
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                bgcolor: darkMode
-                  ? "rgba(30,30,40,0.55)"
-                  : "rgba(220,220,230,0.75)",
-                backdropFilter: "blur(8px)",
-                borderRadius: "12px",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.10)",
-                padding: "8px 32px",
-                margin: "0 auto",
-                minWidth: 400,
-                maxWidth: "90vw",
-              }}
-            >
-              <Typography
-                variant="h6"
-                sx={{
-                  mb: 2,
-                  fontWeight: 600,
-                  color: "text.primary",
-                  letterSpacing: 1,
-                }}
-              >
-                Seleccionar Algoritmo
-              </Typography>
-              <Stack
-                direction="row"
-                spacing={2}
-                alignItems="center"
-                sx={{ width: "100%", justifyContent: "center", mb: 2 }}
-              >
-                <CloudDropdown
-                  label="Algoritmo"
-                  value={algoritmo}
-                  setValue={setAlgoritmo}
-                  options={[
-                    { value: "BFS", label: "BFS (Amplitud)" },
-                    { value: "DFS", label: "DFS (Profundidad)" },
-                    { value: "IDDFS", label: "IDDFS" },
-                    { value: "Costo Uniforme", label: "Costo Uniforme" },
-                    { value: "Ávara", label: "Ávara" },
-                    { value: "A*", label: "A*" },
-                  ]}
-                  minWidth={200}
-                />
-                <Button
-                  variant="contained"
-                  sx={{
-                    minWidth: 180,
-                    fontWeight: 600,
-                    fontSize: "1rem",
-                    borderRadius: "8px",
-                    boxShadow: "none",
-                    bgcolor: darkMode
-                      ? "rgba(40,60,90,0.85)"
-                      : "background.paper",
-                    color: darkMode ? "primary.main" : "primary.dark",
-                    border: "1.5px solid",
-                    borderColor: "primary.main",
-                    "&:hover": {
-                      bgcolor: darkMode ? "rgba(40,60,120,0.95)" : "grey.100",
-                    },
-                  }}
-                  onClick={ejecutarAlgoritmo}
-                  className="boton-ejecutar"
-                >
-                  Ejecutar algoritmo
-                </Button>
-                <Button
-                  variant="outlined"
-                  sx={{
-                    minWidth: 180,
-                    fontWeight: 600,
-                    fontSize: "1rem",
-                    borderRadius: "8px",
-                    boxShadow: "none",
-                    bgcolor: darkMode
-                      ? "rgba(40,60,90,0.85)"
-                      : "background.paper",
-                    color: darkMode ? "warning.main" : "warning.dark",
-                    border: "1.5px solid",
-                    borderColor: "warning.main",
-                    "&:hover": {
-                      bgcolor: darkMode ? "rgba(60,40,90,0.95)" : "grey.100",
-                    },
-                  }}
-                  onClick={() => {
-                    clearSolutionPath();
-                    // Actualizar el camino en el nodo robot
-                    updateRobotSolutionPath([]);
-                    alert("Camino de solución limpiado");
-                  }}
-                >
-                  Limpiar Camino
-                </Button>
-              </Stack>
-            </Box>
-          </Panel>
+
         </ReactFlow>
       </div>
     </ThemeProvider>

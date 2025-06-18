@@ -97,7 +97,8 @@
   /* background-color: #546980; */
   /* background-image: linear-gradient(155deg, #546980c6, #546980); */
 
-  /* color: #333; */ /* Removed for theme compatibility */
+  /* color: #333; */
+  /* Removed for theme compatibility */
   width: 320px;
   min-height: 120px;
   padding: 20px 18px;
@@ -173,8 +174,10 @@
 }
 
 .custom-dropdown {
-  /* background-color: #586673; */ /* Removed for theme compatibility */
-  /* color: #fff; */ /* Removed for theme compatibility */
+  /* background-color: #586673; */
+  /* Removed for theme compatibility */
+  /* color: #fff; */
+  /* Removed for theme compatibility */
   border: none;
   padding: 10px 12px;
   border-radius: 6px;
@@ -204,7 +207,8 @@
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  /* color: #fff; */ /* Color handled by sx prop in App.tsx */
+  /* color: #fff; */
+  /* Color handled by sx prop in App.tsx */
   font-size: 0.7rem;
 }
 
@@ -227,6 +231,7 @@
 .react-flow__controls {
   background: #fff !important;
 }
+
 .react-flow__controls-button {
   background: #fff !important;
   color: #222 !important;
@@ -235,22 +240,109 @@
 
 /* Animación para aristas de solución */
 .react-flow__edge.solution-path {
-    animation: pulse-green 2s infinite;
+  animation: pulse-green 2s infinite;
 }
 
 @keyframes pulse-green {
-    0% { stroke-opacity: 0.8; }
-    50% { stroke-opacity: 1; }
-    100% { stroke-opacity: 0.8; }
+  0% {
+    stroke-opacity: 0.8;
+  }
+
+  50% {
+    stroke-opacity: 1;
+  }
+
+  100% {
+    stroke-opacity: 0.8;
+  }
 }
 
 /* Estilo para el robot celebrando */
 .robot-container.celebrating {
-    animation: celebrate 0.6s ease-in-out;
+  animation: celebrate 0.6s ease-in-out;
 }
 
 @keyframes celebrate {
-    0%, 100% { transform: scale(1) rotate(0deg); }
-    25% { transform: scale(1.1) rotate(-5deg); }
-    75% { transform: scale(1.1) rotate(5deg); }
+
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+
+  25% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+
+  75% {
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
+.top-center-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background-color: rgba(220, 220, 230, 0.75);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10);
+  padding: 16px 32px;
+  margin: 0 auto;
+  min-width: 600px;
+  max-width: 90vw;
+}
+
+.bottom-center-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(220, 220, 230, 0.75);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10);
+  padding: 8px 32px;
+  margin: 0 auto;
+  min-width: 400px;
+  max-width: 90vw;
+}
+
+.boton-panel {
+  min-width: 180px;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 8px;
+  box-shadow: none;
+  backdrop-filter: blur(8px);
+}
+
+.btn-primary {
+  background-color: #fff;
+  color: #0d47a1;
+  border: 1.5px solid #0d47a1;
+}
+
+.btn-primary:hover {
+  background-color: #f1f1f1;
+}
+
+.btn-secondary {
+  background-color: #fff;
+  color: #7b1fa2;
+  border: 1.5px solid #7b1fa2;
+}
+
+.btn-secondary:hover {
+  background-color: #f1f1f1;
+}
+
+.btn-info {
+  background-color: #fff;
+  color: #0288d1;
+  border: 1.5px solid #0288d1;
+}
+
+.btn-info:hover {
+  background-color: #f1f1f1;
 }
