@@ -260,12 +260,14 @@ export const RobotNode = ({ id, data }: NodeProps<BuiltInNode>) => {
       style={{
         cursor: "pointer",
         position: "relative",
-        border: "2px solid purple",
-        borderRadius: "12px",
-        padding: "1px",
-        backgroundColor: "#transparent", //Esta varible hay que modificar en caso de que se quiera ver el fondo
-        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+        border: "1px solid purple",
+        borderRadius: "6px",
+        padding: "2px",
+        backgroundColor: "transparent",
+        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
         transition: "all 0.3s ease",
+        width: "24px",
+        height: "24px",
       }}
     >
       <div
@@ -274,8 +276,8 @@ export const RobotNode = ({ id, data }: NodeProps<BuiltInNode>) => {
         <img
           src={getCurrentImage()}
           alt={`Robot ${robotState}`}
-          width={64}
-          height={64}
+          width={16} // Imagen más pequeña (era 64x64, ahora 16x16)
+          height={16}
           className="robot-image"
           style={{
             display: "block",
@@ -288,17 +290,17 @@ export const RobotNode = ({ id, data }: NodeProps<BuiltInNode>) => {
           className="robot-status"
           style={{
             position: "absolute",
-            top: "-10px",
-            right: "-10px",
-            fontSize: "20px",
+            top: "-4px",
+            right: "-4px",
+            fontSize: "10px", // Emoji más pequeño
             backgroundColor: "white",
             borderRadius: "50%",
-            width: "30px",
-            height: "30px",
+            width: "14px", // Círculo más pequeño
+            height: "14px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.2)",
             animation: isCelebrating
               ? "celebrate 0.6s ease-in-out infinite alternate"
               : "none",
