@@ -34,6 +34,7 @@ import { useRobotMovement } from "./components/useRobotMovement";
 import { convertirAGrafoJSON } from "./controllers/toFromJson";
 import { CloudDropdown } from "./components/CloudDropdown";
 import { NodeEmpty } from "./components/nodes/NodeEmpty";
+import { generarConexionesSinColision } from "./utils/autoConnectUtils";
 
 // Aquí se deben importar los nodos personalizados que se hayan hecho
 const nodeTypes = {
@@ -47,56 +48,14 @@ const nodeTypes = {
 
 // Lista de nodos iniciales de prueba, se podrían borrar más adelante
 const nodosIniciales: Array<defaultNodeModel> = [
-  {
-    id: "1", // ID del nodo
-    position: { x: 0, y: 0 }, // Posición inicial
-    data: { label: "1" }, // Etiqueta / Texto a mostrar
-    type: "nodeTest", // Tipo de nodo a utilizar
-  },
-  {
-    id: "2",
-    position: { x: 100, y: 100 },
-    data: { label: "2" },
-    type: "nodeTest",
-  },
-  {
-    id: "3",
-    position: { x: 200, y: 100 },
-    data: { label: "3" },
-    type: "nodeRombo",
-  },
+
   {
     id: "0",
-    position: { x: 400, y: 200 },
+    position: { x: -81, y: 19 },
     data: { label: "Robot" },
     type: "nodeRobot",
   },
-  // NodeGroup donde contener los nodeEmpty
-  {
-    id: "-1",
-    position: { x: -100, y: -100 },
-    data: { label: "" },
-    height: 20,
-    width: 100,
-    type: "group"
-  },
-  // NodesEmpty que están en el group anterior
-  {
-    id: "-2",
-    position: { x: 10, y: 10 },
-    data: { label: "" },
-    type: "nodeEmpty",
-    parentId: "-1",
-    draggable: false,
-  },
-  {
-    id: "-3",
-    position: { x: 90, y: 10 },
-    data: { label: "" },
-    type: "nodeEmpty",
-    parentId: "-1",
-    draggable: false,
-  }
+
 ];
 
 // Lista de aristas iniciales de prueba, se podrían borrar más adelante
@@ -217,7 +176,7 @@ function Flow() {
   );
 
   // Hooks para conservar el último ID de nodo añadido
-  const ultimoId = useRef(3); // Está así para contar las dos iniciales, si esas se borran, recuerden cambiar este valor
+  const ultimoId = useRef(0); // Está así para contar las dos iniciales, si esas se borran, recuerden cambiar este valor
   // Valores para coordenadas que se usan cuando se añade un nodo individual
   const xPos = useRef(50);
   const yPos = useRef(50);
@@ -568,6 +527,7 @@ function Flow() {
           fitView // Ajusta la pantalla para contener y centrar los nodos iniciales
           connectionMode={ConnectionMode.Loose} // Se define de esta forma para que los conectores puedan iniciar y terminar conexiones
           colorMode={darkMode ? "dark" : "light"}
+          defaultEdgeOptions={{ type: 'straight' }}
         >
           <Background /* Fondo punteado */ />
           <Controls /* Botones de la esquina inferior izquierda */ />
@@ -733,9 +693,13 @@ function Flow() {
                       bgcolor: darkMode ? "rgba(40,120,140,0.85)" : "grey.100",
                     },
                   }}
-                  onClick={pruebaOnClick}
+                  onClick={() => {
+                    const nuevas = generarConexionesSinColision(nodes);
+                    setEdges(nuevas);
+                    alert("Conexiones generadas automáticamente");
+                  }}
                 >
-                  IMPRIMIR NODOS Y ARISTAS
+                  GENERAR CONEXIONES
                 </Button>
                 <Button
                   variant="outlined"

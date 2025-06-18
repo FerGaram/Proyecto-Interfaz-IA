@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import {
   Handle,
-  Position,
   useReactFlow,
   useNodeId,
   type BuiltInNode,
@@ -12,7 +11,7 @@ export const NodeCircle = ({
   data,
   positionAbsoluteX,
   positionAbsoluteY,
-}: NodeProps<BuiltInNode>) => {
+}: NodeProps<BuiltInNode>) => {const NODE_WIDTH = 80;
   const nodeId = useNodeId();
   const { setNodes } = useReactFlow();
   const [isEditing, setIsEditing] = useState(false);
@@ -28,9 +27,25 @@ export const NodeCircle = ({
   }, [labelValue, nodeId, setNodes]);
 
   return (
-    <div className="node-circle">
-      <Handle type="source" position={Position.Top} id="top" />
-      <Handle type="source" position={Position.Left} id="left" />
+    <div className="node-circle" style={{ position: "relative" }}>
+      {/* Único handle central */}
+      <Handle
+        type="source"
+        position="top"
+        id="center"
+        style={{
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          background: "#555",
+          width: 10,
+          height: 10,
+          borderRadius: "50%",
+          position: "absolute",
+          opacity: 0,
+          pointerEvents: "auto", 
+        }}
+      />
 
       {isEditing ? (
         <input
@@ -50,8 +65,6 @@ export const NodeCircle = ({
       <div className="node-coords-circle">
         ({Math.round(positionAbsoluteX)}, {Math.round(positionAbsoluteY)})
       </div>
-      <Handle type="source" position={Position.Bottom} id="bottom" />
-      <Handle type="source" position={Position.Right} id="right" />
     </div>
   );
 };
